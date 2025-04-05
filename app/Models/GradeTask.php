@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class GradeTask extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['subject_id', 'task_name', 'score', 'student_id'];
+
+    // Relasi ke tabel students
+    public function student()
+    {
+        return $this->belongsTo(Student::class);
+    }
+
+    // Relasi ke tabel subjects
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
+}
