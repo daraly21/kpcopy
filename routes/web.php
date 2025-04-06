@@ -9,6 +9,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfilePictureController;
 use App\Http\Controllers\ClassController;
+use App\Http\Controllers\StudentController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -29,6 +30,7 @@ Route::middleware(['auth', 'role:Admin'])
     ->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('kelas', ClassController::class);
+        Route::resource('siswa', StudentController::class);
     });
 
 // 🧑‍🏫 WALI KELAS ONLY
