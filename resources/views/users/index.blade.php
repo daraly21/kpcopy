@@ -1,185 +1,108 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight flex items-center">
+            <span class="iconify text-indigo-600 text-2xl mr-2" data-icon="mdi:account-group"></span>
             {{ __('Manajemen User') }}
         </h2>
     </x-slot>
 
-    <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-1">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    @if (session('success'))
-                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
-                            role="alert">
+    <div class="py-6 container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white overflow-hidden shadow-md rounded-lg border border-gray-200">
+            <div class="p-6">
+                <!-- Success Message -->
+                @if (session('success'))
+                    <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6 relative shadow-sm" role="alert">
+                        <div class="flex items-center">
+                            <span class="iconify text-green-600 h-5 w-5 mr-2" data-icon="mdi:check-circle"></span>
                             <span class="block sm:inline">{{ session('success') }}</span>
-                            <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
-                                <button type="button" @click="$dispatch('close')">
-                                    <span class="iconify text-green-500 h-6 w-6" data-icon="mdi:close"></span>
-                                </button>
-                            </span>
                         </div>
-                    @endif
-
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-lg font-medium text-gray-900">Daftar User</h3>
-                        <a href="{{ route('admin.users.create') }}"
-                            class="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center">
-                            <span class="iconify mr-2" data-icon="mdi:plus"></span>
-                            Tambah User
-                        </a>
+                        <button type="button" @click="$dispatch('close')" class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                            <span class="iconify text-green-600 h-5 w-5" data-icon="mdi:close"></span>
+                        </button>
                     </div>
+                @endif
 
-                    <div class="overflow-x-auto">
-                        <table id="usersTable" class="min-w-full bg-white">
-                            <thead>
-                                <tr>
-                                    <th
-                                        class="px-6 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        No</th>
-                                    <th
-                                        class="px-6 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        Foto Profil</th>
-                                    <th
-                                        class="px-6 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        Nama</th>
-                                    <th
-                                        class="px-6 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        Email</th>
-                                    <th
-                                        class="px-6 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        Role</th>
-                                    <th
-                                        class="px-6 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        Kelas</th>
-                                    <th
-                                        class="px-6 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($users as $index => $user)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                                            {{ $index + 1 }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap border-b border-gray-200 text-center">
-                                            @if ($user->profile_picture)
-                                                <img src="{{ $user->profile_picture }}" alt="Profile"
-                                                    class="rounded-full inline-block h-12 w-12 object-cover">
-                                            @else
-                                                <div
-                                                    class="rounded-full inline-block h-12 w-12 bg-gray-200 flex items-center justify-center">
-                                                    <span class="iconify text-gray-400 text-xl"
-                                                        data-icon="mdi:account"></span>
-                                                </div>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                                            {{ $user->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                                            {{ $user->email }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                <!-- Header dan Tombol Tambah -->
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <span class="iconify text-indigo-600 text-xl mr-2" data-icon="mdi:account-multiple"></span>
+                        Daftar User
+                    </h3>
+                    <a href="{{ route('admin.users.create') }}"
+                       class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center border border-indigo-700 transition-all duration-200 hover:shadow-md">
+                        <span class="iconify text-xl mr-2" data-icon="mdi:plus"></span>
+                        Tambah User
+                    </a>
+                </div>
+
+                <!-- Tabel -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 border border-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-12 border border-gray-200">No</th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider w-20 border border-gray-200">Foto Profil</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-56 border border-gray-200">Nama</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-64 border border-gray-200">Email</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-36 border border-gray-200">Role</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider w-40 border border-gray-200">Kelas</th>
+                                <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider w-24 border border-gray-200">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @forelse ($users as $index => $user)
+                                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border border-gray-200">{{ $index + 1 }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center border border-gray-200">
+                                        @if ($user->profile_picture)
+                                            <img src="{{ $user->profile_picture }}" alt="Profile"
+                                                 class="rounded-full inline-block h-12 w-12 object-cover border-2 border-indigo-200 hover:border-indigo-400 transition-colors duration-150">
+                                        @else
+                                            <div class="rounded-full h-12 w-12 bg-gray-100 flex items-center justify-center border-2 border-gray-200">
+                                                <span class="iconify text-gray-400 text-2xl" data-icon="mdi:account"></span>
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900 max-w-56 break-words border border-gray-200">{{ $user->name }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-500 max-w-64 break-words border border-gray-200">{{ $user->email }}</td>
+                                    <td class="px-6 py-4 text-sm max-w-36 border border-gray-200">
+                                        <div class="flex flex-wrap gap-2">
                                             @foreach ($user->roles as $role)
-                                                <span
-                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">{{ $role->name }}</span>
+                                                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 hover:bg-indigo-200 transition-colors duration-150 whitespace-nowrap">{{ $role->name }}</span>
                                             @endforeach
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                                            {{ $user->class ? $user->class->name : '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap border-b border-gray-200 text-center">
-
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-500 max-w-40 break-words border border-gray-200">{{ $user->class ? $user->class->name : '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-center border border-gray-200">
+                                        <div class="flex justify-center space-x-3">
                                             <!-- Edit -->
                                             <a href="{{ route('admin.users.edit', $user->id) }}"
-                                                class="text-yellow-600 hover:text-yellow-900 mr-2">
-                                                <span class="iconify text-lg" data-icon="mdi:pencil"></span>
+                                               class="text-indigo-600 hover:text-indigo-900 flex items-center">
+                                                <span class="iconify text-xl" data-icon="mdi:pencil"></span>
                                             </a>
-
                                             <!-- Delete -->
-                                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST"
-                                                class="inline"
-                                                onsubmit="return confirm('Yakin ingin menghapus user {{ $user->name }}?')">
+                                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" class="inline"
+                                                  onsubmit="return confirm('Yakin ingin menghapus user {{ $user->name }}?')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900">
-                                                    <span class="iconify text-lg" data-icon="mdi:trash"></span>
+                                                <button type="submit" class="text-red-600 hover:text-red-900 flex items-center">
+                                                    <span class="iconify text-xl" data-icon="mdi:trash-can"></span>
                                                 </button>
                                             </form>
-
-                                        </td>
-
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500 border border-gray-200">
+                                        Tidak ada data user yang tersedia
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
-
-
-    @push('scripts')
-        <script>
-            document.addEventListener('alpine:init', () => {
-                Alpine.data('usersTable', () => ({
-                    init() {
-                        $('#usersTable').DataTable({
-                            responsive: true
-                        });
-                    },
-                    showUserDetails(userId) {
-                        fetch(`/admin/users/${userId}`)
-                            .then(res => res.json())
-                            .then(data => {
-                                const user = data.user;
-                                document.getElementById('showUserName').textContent = user.name;
-                                document.getElementById('showUserEmail').textContent = user.email;
-                                document.getElementById('showUserRole').textContent = user.roles[0]
-                                    .name;
-                                document.getElementById('showUserClass').textContent = user.class ? user
-                                    .class.name : '-';
-                                document.getElementById('showUserImage').src = user.profile_picture ?
-                                    `/storage/${user.profile_picture}` :
-                                    '/img/default-profile.png';
-                                $dispatch('open-modal', 'show-user-modal');
-                            }).catch(err => {
-                                console.error(err);
-                                alert('Gagal mendapatkan data user');
-                            });
-                    },
-                    editUser(userId) {
-                        fetch(`/admin/users/${userId}`)
-                            .then(res => res.json())
-                            .then(data => {
-                                const user = data.user;
-                                document.getElementById('editUserId').value = userId;
-                                document.getElementById('editName').value = user.name;
-                                document.getElementById('editEmail').value = user.email;
-                                document.getElementById('editRole').value = user.roles[0].id;
-                                if (user.roles[0].id == 2) {
-                                    document.querySelector('.edit-class-section').style.display =
-                                        'block';
-                                    document.getElementById('editClassId').value = user.class ? user
-                                        .class.id : '';
-                                } else {
-                                    document.querySelector('.edit-class-section').style.display =
-                                        'none';
-                                }
-                                document.getElementById('editUserForm').action =
-                                    `/admin/users/${userId}`;
-                                $dispatch('open-modal', 'edit-user-modal');
-                            }).catch(err => {
-                                console.error(err);
-                                alert('Gagal mendapatkan data user untuk edit');
-                            });
-                    },
-                    handleRoleChange(event, type) {
-                        const value = event.target.value;
-                        const selector = type === 'create' ? '.class-section' : '.edit-class-section';
-                        document.querySelector(selector).style.display = value == 2 ? 'block' : 'none';
-                    }
-                }));
-            });
-        </script>
-    @endpush
 </x-app-layout>

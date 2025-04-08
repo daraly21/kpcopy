@@ -9,6 +9,7 @@ use App\Models\ClassModel;
 use App\Models\Subject;
 use App\Models\GradeTask;
 use App\Models\Student;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -136,8 +137,17 @@ public function index()
         ));
     }
 
-    // --- Logika Dashboard Admin ---
-    return view('dashboards.admin'); // Ganti sesuai tampilan Admin kamu
+    $totalWaliKelas = User::where('role_id', 2)->count();
+    $totalSiswa = Student::count();
+    $totalKelas = ClassModel::count();
+    $totalMapel = Subject::count();
+    
+    return view('dashboards.admin', compact(
+        'totalWaliKelas',
+        'totalSiswa',
+        'totalKelas',
+        'totalMapel'
+    ));
 }
 
 

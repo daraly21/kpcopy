@@ -42,8 +42,9 @@
 
             <!-- Manajemen Siswa -->
             <li>
-                <a href="{{ route('admin.siswa.kelas') }}" @click="handleNavigation"
-                    class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
+                <a href="{{ auth()->user()->hasRole('Admin') ? route('admin.siswa.kelas') : route('walikelas.students.index', ['classId' => auth()->user()->class_id]) }}" 
+                   @click="handleNavigation"
+                   class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
                     <div class="w-14 h-14 flex items-center justify-center flex-shrink-0">
                         <span class="iconify text-2xl" data-icon="mdi:account-group"></span>
                     </div>
@@ -53,6 +54,13 @@
                     </div>
                 </a>
             </li>
+            {{-- <li class="nav-item">
+                <a href="{{ auth()->user()->hasRole('Admin') ? route('admin.siswa.kelas') : route('walikelas.students.index', ['classId' => auth()->user()->class_id ?? 0]) }}" 
+                   class="nav-link {{ request()->routeIs('admin.siswa.kelas') || request()->routeIs('walikelas.students.*') ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-users"></i>
+                    <p>Manajemen Siswa</p>
+                </a>
+            </li> --}}
 
             <!-- Manajemen Kelas -->
             <li>

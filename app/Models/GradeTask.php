@@ -9,7 +9,7 @@ class GradeTask extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['subject_id', 'task_name', 'score', 'student_id'];
+    protected $fillable = ['subject_id', 'task_name', 'type', 'score', 'student_id' , 'grades_id'];
 
     // Relasi ke tabel students
     public function student()
@@ -21,5 +21,10 @@ class GradeTask extends Model
     public function subject()
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    public function grade()
+    {
+        return $this->belongsTo(Grade::class, 'grades_id');
     }
 }

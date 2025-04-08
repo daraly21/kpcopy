@@ -9,7 +9,7 @@
         <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow">
             <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
-                    <dt class="font-semibold text-gray-700">Nama Lengkap</dt>
+                    <dt class="font-semibold text-gray-700">Nami Lengkap</dt>
                     <dd class="text-gray-900">{{ $student->name }}</dd>
                 </div>
                 <div>

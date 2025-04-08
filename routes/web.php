@@ -11,7 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfilePictureController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\UserController;
-
+use App\Http\Controllers\WaliKelasStudentController;
 
 // =====================
 // 🎉 Halaman Awal (Welcome)
@@ -76,10 +76,13 @@ Route::middleware(['auth', 'role:Wali Kelas'])->group(function () {
     Route::post('notifications/send', [NotificationController::class, 'sendNotification'])->name('notifications.send');
     Route::post('notifications/reset', [NotificationController::class, 'resetNotificationStatus'])->name('notifications.reset');
 
-    Route::get('/grades/export', [App\Http\Controllers\GradeExportController::class, 'index'])->name('grades.export');
-    Route::post('/grades/generate-export', [App\Http\Controllers\GradeExportController::class, 'generateExport'])->name('grades.generate-export');
+    // Expirt Nilai
+    Route::get('/grades/export', [GradeExportController::class, 'index'])->name('grades.export');
+    Route::post('/grades/generate-export', [GradeExportController::class, 'generateExport'])->name('grades.generate-export');
     
-
+   // 📱 Manajemen Data Siswa (tambahan baru)
+   Route::get('kelas/{classId}/students', [WaliKelasStudentController::class, 'index'])->name('walikelas.students.index');
+   Route::put('siswa/{student}/update-phone', [WaliKelasStudentController::class, 'updateParentPhone'])->name('students.update-phone');
 });
 
 // =====================

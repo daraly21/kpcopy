@@ -26,8 +26,8 @@
                     </div>
                 @endif
                 
-                <!-- Subject and Task Selection -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Subject, Semester and Task Selection -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <!-- Subject Selection -->
                     <div>
                         <label for="subject_id" class="block text-sm font-medium text-gray-700 mb-1">Mata Pelajaran *</label>
@@ -38,6 +38,17 @@
                             @foreach($subjects as $subject)
                                 <option value="{{ $subject->id }}">{{ $subject->name }}</option>
                             @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Semester Selection -->
+                    <div>
+                        <label for="semester" class="block text-sm font-medium text-gray-700 mb-1">Semester *</label>
+                        <select id="semester" 
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 h-10 pl-3 pr-8"
+                            required>
+                            <option value="odd" selected>Gasal</option>
+                            <option value="even">Genap</option>
                         </select>
                     </div>
                     
@@ -58,12 +69,28 @@
                     </div>
                 </div>
                 
-                <!-- Task Name Input -->
-                <div class="mb-6">
-                    <label for="task_name" class="block text-sm font-medium text-gray-700 mb-1">Nama Tugas *</label>
-                    <input type="text" id="task_name" 
-                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 h-10 px-3"
-                        required>
+                <!-- Task Name and Type Selection -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Task Name Input -->
+                    <div>
+                        <label for="task_name" class="block text-sm font-medium text-gray-700 mb-1">Nama Tugas *</label>
+                        <input type="text" id="task_name" 
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 h-10 px-3"
+                            required>
+                    </div>
+                    
+                    <!-- Task Type Selection -->
+                    <div>
+                        <label for="assignment_type" class="block text-sm font-medium text-gray-700 mb-1">Tipe Tugas *</label>
+                        <select id="assignment_type" 
+                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 h-10 pl-3 pr-8"
+                            required>
+                            <option value="">Pilih Tipe Tugas</option>
+                            <option value="written">Tertulis</option>
+                            <option value="observation">Pengamatan</option>
+                            <option value="homework">PR</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <!-- Students List -->
@@ -115,6 +142,8 @@
                     <input type="hidden" name="subject_id" id="form_subject_id">
                     <input type="hidden" name="task_name" id="form_task_name">
                     <input type="hidden" name="grade_data" id="grade_data">
+                    <input type="hidden" name="assignment_type" id="form_assignment_type">
+                    <input type="hidden" name="semester" id="form_semester">
                     
                     <div class="mt-6">
                         <button type="button" id="submitBtn"
@@ -137,9 +166,11 @@
         submitBtn.addEventListener('click', function() {
             const subjectId = document.getElementById('subject_id').value;
             const taskName = document.getElementById('task_name').value;
+            const assignmentType = document.getElementById('assignment_type').value;
+            const semester = document.getElementById('semester').value;
             
-            if (!subjectId || !taskName) {
-                showAlert('error', 'Mata pelajaran dan nama tugas harus diisi!');
+            if (!subjectId || !taskName || !assignmentType) {
+                showAlert('error', 'Mata pelajaran, nama tugas, dan tipe tugas harus diisi!');
                 return;
             }
             
@@ -162,6 +193,8 @@
             
             document.getElementById('form_subject_id').value = subjectId;
             document.getElementById('form_task_name').value = taskName;
+            document.getElementById('form_assignment_type').value = assignmentType;
+            document.getElementById('form_semester').value = semester;
             document.getElementById('grade_data').value = JSON.stringify(scores);
             
             // Show loading state
