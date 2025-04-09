@@ -19,9 +19,10 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             ClassSeeder::class,
             UserSeeder::class,
-            StudentSeeder::class,
-            GradeSeeder::class,
-            GradeTaskSeeder::class,
+            SubjectSeeder::class,
+            // StudentSeeder::class,
+            // GradeSeeder::class,
+            // GradeTaskSeeder::class,
         ]);
 
     }
