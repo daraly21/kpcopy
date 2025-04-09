@@ -1,1 +1,12 @@
-t
+[build]
+command = """
+  composer install --no-interaction --prefer-dist --optimize-autoloader && 
+  rm -rf node_modules && 
+  npm ci --force && 
+  npm run build && 
+  php artisan key:generate --force && 
+  php artisan storage:link
+"""
+
+[build.uses]
+node = "18"
