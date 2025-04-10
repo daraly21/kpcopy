@@ -83,97 +83,92 @@ class NotificationController extends Controller
         ));
     }
 
-    public function sendNotification(Request $request)
-    {
-        try {
-            $subject_id = $request->input('subject_id');
-            $task_name = $request->input('task_name');
-            $student_ids = $request->input('students', []);
-            
-            if (empty($student_ids)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No students selected'
-                ], 400);
-            }
-        
-            $students = Student::whereIn('id', $student_ids)
-                ->with(['gradeTasks' => function ($query) use ($subject_id, $task_name) {
-                    if ($subject_id) {
-                        $query->where('subject_id', $subject_id);
-                    }
-                    if ($task_name) {
-                        $query->where('task_name', $task_name);
-                    }
-                }])->get();
-        
-            $sent_count = 0;
-            $failed_count = 0;
-            
-            foreach ($students as $student) {
-                $task = $student->gradeTasks->first();
-                if ($task) {
-                    try {
-                        // Base message
-                        $message = "📢 Halo, berikut adalah nilai terbaru untuk {$student->name}:\n"
-                                . "📖 Mata Pelajaran: {$task->subject->name}\n"
-                                . "📝 Tugas: {$task->task_name}\n"
-                                . "🎯 Nilai: {$task->score}\n\n";
-                        
-                        // Tambahkan pesan berdasarkan nilai
-                        $score = (float) $task->score;
-                        
-                        if ($score < 60) {
-                            $message .= "⚠️ Nilai masih di bawah KKM. Mohon bimbingan untuk meningkatkan pemahaman pada materi ini.";
-                        } elseif ($score >= 60 && $score < 80) {
-                            $message .= "👍 Nilai sudah cukup baik. Dengan sedikit usaha lebih, nilai dapat ditingkatkan.";
-                        } else { // $score >= 80
-                            $message .= "🌟 Nilai sangat baik! Pertahankan prestasi ini.";
-                        }
-                        
-                        // Kirim pesan
-                        $sendResult = $this->fonnteService->sendMessage($student->parent_phone, $message);
-                        
-                        // Verifikasi hasil pengiriman pesan
-                        if ($sendResult) {
-                            // Simpan status pengiriman ke database
-                          // Di method sendNotification
-                        $notification = Notification::updateOrCreate(
-                            [
-                                'student_id' => $student->id,
-                                'subject_id' => $task->subject_id,
-                                'task_name' => $task->task_name,
-                            ],
-                            [
-                                'sent_at' => now(),
-                            ]
-                        );
-                            Log::info("Notification sent and saved for student {$student->id}: {$notification->id}");
-                            $sent_count++;
-                        } else {
-                            Log::error("Failed to send notification to {$student->parent_phone}");
-                            $failed_count++;
-                        }
-                    } catch (\Exception $e) {
-                        Log::error("Error sending notification for student {$student->id}: " . $e->getMessage());
-                        $failed_count++;
-                    }
-                }
-            }
-        
-            return response()->json([
-                'success' => true,
-                'message' => "Successfully sent {$sent_count} notifications. Failed: {$failed_count}",
-                'refresh' => true
-            ]);
-        } catch (\Exception $e) {
-            Log::error("Error in sendNotification method: " . $e->getMessage());
+   public function sendNotification(Request $request)
+{
+    try {
+        $subject_id = $request->input('subject_id');
+        $task_name = $request->input('task_name');
+        $student_ids = $request->input('students', []);
+
+        if (empty($student_ids)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error sending notifications: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Tidak ada siswa yang dipilih'
+            ], 400);
         }
+
+        $students = Student::whereIn('id', $student_ids)
+            ->with(['gradeTasks' => function ($query) use ($subject_id, $task_name) {
+                if ($subject_id) $query->where('subject_id', $subject_id);
+                if ($task_name) $query->where('task_name', $task_name);
+            }])->get();
+
+        $sent_count = 0;
+        $failed_count = 0;
+
+        foreach ($students as $student) {
+            $task = $student->gradeTasks->first();
+            if (!$task) {
+                Log::warning("No grade task for student {$student->id}");
+                $failed_count++;
+                continue;
+            }
+            if (!$student->parent_phone) {
+                Log::warning("No parent phone for student {$student->id}");
+                $failed_count++;
+                continue;
+            }
+
+            try {
+                $message = "📢 Halo, berikut adalah nilai terbaru untuk {$student->name}:\n"
+                        . "📖 Mata Pelajaran: {$task->subject->name}\n"
+                        . "📝 Tugas: {$task->task_name}\n"
+                        . "🎯 Nilai: {$task->score}\n\n";
+
+                $score = (float) $task->score;
+                if ($score < 60) {
+                    $message .= "⚠️ Nilai masih di bawah KKM. Mohon bimbingan untuk meningkatkan pemahaman pada materi ini.";
+                } elseif ($score >= 60 && $score < 80) {
+                    $message .= "👍 Nilai sudah cukup baik. Dengan sedikit usaha lebih, nilai dapat ditingkatkan.";
+                } else {
+                    $message .= "🌟 Nilai sangat baik! Pertahankan prestasi ini.";
+                }
+
+                $sendResult = $this->fonnteService->sendMessage($student->parent_phone, $message);
+                if ($sendResult) {
+                    Notification::updateOrCreate(
+                        [
+                            'student_id' => $student->id,
+                            'subject_id' => $task->subject_id,
+                            'task_name' => $task->task_name,
+                        ],
+                        ['sent_at' => now()]
+                    );
+                    Log::info("Notification sent to {$student->parent_phone} for student {$student->id}");
+                    $sent_count++;
+                } else {
+                    Log::error("Failed to send notification to {$student->parent_phone}");
+                    $failed_count++;
+                }
+            } catch (\Exception $e) {
+                Log::error("Error sending notification for student {$student->id}: " . $e->getMessage());
+                $failed_count++;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Berhasil mengirim {$sent_count} notifikasi. Gagal: {$failed_count}",
+            'refresh' => true
+        ]);
+    } catch (\Exception $e) {
+        Log::error("Error in sendNotification: " . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ], 500);
     }
+}
     
     public function resetNotificationStatus(Request $request)
     {
