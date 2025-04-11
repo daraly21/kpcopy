@@ -12,9 +12,21 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        
+        // Tambahkan alias untuk middleware role
         $middleware->alias([
             'role' => RoleMiddleware::class,
+        ]);
+
+        // Tambahkan middleware CORS secara global untuk grup 'web'
+        $middleware->prependToGroup('web', \Illuminate\Http\Middleware\HandleCors::class);
+
+        // Pastikan middleware stateful API diaktifkan (untuk session dan CSRF)
+        $middleware->statefulApi();
+
+        // Kecualikan route tertentu dari verifikasi CSRF (opsional, untuk testing)
+        $middleware->validateCsrfTokens(except: [
+            'notifications/send',
+            'notifications/reset',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

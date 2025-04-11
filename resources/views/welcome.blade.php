@@ -12,13 +12,7 @@
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
     <!-- Styles / Scripts -->
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @else
-        <!-- Fallback Tailwind CSS jika Vite tidak digunakan -->
-        <script src="https://cdn.tailwindcss.com"></script>
-    @endif
-
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
@@ -91,7 +85,7 @@
         </nav>
     @endif
 
-    
+
         <!-- Hero Section dengan Slideshow -->
         <section class="relative h-screen w-full overflow-hidden pt-18">
             <!-- Swiper Slideshow -->

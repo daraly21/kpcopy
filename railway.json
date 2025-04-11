@@ -1,0 +1,18 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "command": "npm install && npm run build && composer install",
+    "builder": "nixpacks",
+    "nixpacks": {
+      "nodeVersion": "18"
+    },
+    "cache": false
+  },
+  "deploy": {
+    "startCommand": "php artisan serve --host=0.0.0.0 --port=9000",
+    "env": {
+      "APP_ENV": "production",
+      "APP_DEBUG": "true"
+    }
+  }
+}

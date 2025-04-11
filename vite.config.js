@@ -8,4 +8,10 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    server: {
+        https: true, // Pastikan Vite mendukung HTTPS
+    },
+    build: {
+        outDir: 'public/build',
+    },
 });

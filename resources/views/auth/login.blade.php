@@ -6,7 +6,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Web Pengelolaan Nilai') }} - Login</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         .clip-trapezoid {
@@ -15,6 +14,7 @@
             z-index: 10;
         }
     </style>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class="font-sans text-gray-900 antialiased">
     <div class="relative min-h-screen w-full">
