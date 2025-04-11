@@ -24,9 +24,9 @@
     </button>
 
     <!-- Navigation Section -->
-    <nav class="flex-1 mt-4 overflow-y-auto scrollbar-hide" x-ref="navScroll" @scroll="saveScrollPosition()">
+<nav class="flex-1 mt-4 overflow-y-auto scrollbar-hide" x-ref="navScroll" @scroll="saveScrollPosition()">
         <ul class="space-y-1">
-            <!-- Dashboard -->
+            <!-- Dashboard (Tampil untuk semua peran) -->
             <li>
                 <a href="{{ route('dashboard') }}" @click="handleNavigation"
                     class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
@@ -34,35 +34,31 @@
                         <span class="iconify text-2xl" data-icon="mdi:view-dashboard"></span>
                     </div>
                     <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
-                        :class="isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
+                        :class="$store.sidebar.isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
                         <span>Dashboard</span>
                     </div>
                 </a>
             </li>
 
-            <!-- Manajemen Siswa -->
+            <!-- Manajemen Siswa (Tampil untuk Admin dan Wali Kelas) -->
+            @if (auth()->user()->hasRole(['Admin', 'Wali Kelas']))
             <li>
-                <a href="{{ auth()->user()->hasRole('Admin') ? route('admin.siswa.kelas') : route('walikelas.students.index', ['classId' => auth()->user()->class_id]) }}" 
-                   @click="handleNavigation"
-                   class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
+                <a href="{{ auth()->user()->hasRole('Admin') ? route('admin.siswa.kelas') : route('walikelas.students.index', ['classId' => auth()->user()->class_id]) }}"
+                    @click="handleNavigation"
+                    class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
                     <div class="w-14 h-14 flex items-center justify-center flex-shrink-0">
                         <span class="iconify text-2xl" data-icon="mdi:account-group"></span>
                     </div>
                     <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
-                        :class="isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
+                        :class="$store.sidebar.isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
                         <span>Manajemen Siswa</span>
                     </div>
                 </a>
             </li>
-            {{-- <li class="nav-item">
-                <a href="{{ auth()->user()->hasRole('Admin') ? route('admin.siswa.kelas') : route('walikelas.students.index', ['classId' => auth()->user()->class_id ?? 0]) }}" 
-                   class="nav-link {{ request()->routeIs('admin.siswa.kelas') || request()->routeIs('walikelas.students.*') ? 'active' : '' }}">
-                    <i class="nav-icon fas fa-users"></i>
-                    <p>Manajemen Siswa</p>
-                </a>
-            </li> --}}
+            @endif
 
-            <!-- Manajemen Kelas -->
+            <!-- Manajemen Kelas (Tampil hanya untuk Admin) -->
+            @if (auth()->user()->hasRole('Admin'))
             <li>
                 <a href="{{ route('admin.kelas.index') }}" @click="handleNavigation"
                     class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
@@ -70,13 +66,15 @@
                         <span class="iconify text-2xl" data-icon="mdi:google-classroom"></span>
                     </div>
                     <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
-                        :class="isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
+                        :class="$store.sidebar.isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
                         <span>Manajemen Kelas</span>
                     </div>
                 </a>
             </li>
+            @endif
 
-            <!-- Input Nilai -->
+            <!-- Input Nilai (Tampil untuk Wali Kelas) -->
+            @if (auth()->user()->hasRole('Wali Kelas'))
             <li>
                 <a href="{{ route('grades.create') }}" @click="handleNavigation"
                     class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
@@ -84,27 +82,31 @@
                         <span class="iconify text-2xl" data-icon="mdi:clipboard-text"></span>
                     </div>
                     <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
-                        :class="isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
+                        :class="$store.sidebar.isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
                         <span>Input Nilai</span>
                     </div>
                 </a>
             </li>
+            @endif
 
-            <!-- Rekap Nilai -->
+            <!-- Rekap Nilai (Tampil untuk Wali Kelas) -->
+            @if (auth()->user()->hasRole('Wali Kelas'))
             <li>
-                <a href=" {{ route('grades.recap') }}" @click="handleNavigation"
+                <a href="{{ route('grades.recap') }}" @click="handleNavigation"
                     class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
                     <div class="w-14 h-14 flex items-center justify-center flex-shrink-0">
                         <span class="iconify text-2xl" data-icon="mdi:file-chart"></span>
                     </div>
                     <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
-                        :class="isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
+                        :class="$store.sidebar.isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
                         <span>Rekap Nilai</span>
                     </div>
                 </a>
             </li>
+            @endif
 
-            <!-- Notifikasi -->
+            <!-- Notifikasi (Tampil untuk Wali Kelas) -->
+            @if (auth()->user()->hasRole('Wali Kelas'))
             <li>
                 <a href="{{ route('notifications.index') }}" @click="handleNavigation"
                     class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
@@ -112,13 +114,15 @@
                         <span class="iconify text-2xl" data-icon="mdi:cellphone-message"></span>
                     </div>
                     <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
-                        :class="isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
+                        :class="$store.sidebar.isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
                         <span>Notifikasi</span>
                     </div>
                 </a>
             </li>
+            @endif
 
-            <!-- Export Data -->
+            <!-- Export Data (Tampil untuk Wali Kelas) -->
+            @if (auth()->user()->hasRole('Wali Kelas'))
             <li>
                 <a href="{{ route('grades.export') }}" @click="handleNavigation"
                     class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
@@ -126,13 +130,30 @@
                         <span class="iconify text-2xl" data-icon="mdi:export"></span>
                     </div>
                     <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
-                        :class="isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
+                        :class="$store.sidebar.isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
                         <span>Export Data</span>
                     </div>
                 </a>
             </li>
+            @endif
 
-            <!-- Pengaturan Akun -->
+            <!-- Manajemen Pengguna (Tampil hanya untuk Admin) -->
+            @if (auth()->user()->hasRole('Admin'))
+            <li>
+                <a href="{{ route('admin.users.index') }}" @click="handleNavigation"
+                    class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
+                    <div class="w-14 h-14 flex items-center justify-center flex-shrink-0">
+                        <span class="iconify text-2xl" data-icon="mdi:account-cog"></span>
+                    </div>
+                    <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
+                        :class="$store.sidebar.isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
+                        <span>Manajemen Pengguna</span>
+                    </div>
+                </a>
+            </li>
+            @endif
+
+            <!-- Pengaturan Akun (Tampil untuk semua peran) -->
             <li>
                 <a href="{{ route('profile.edit') }}" @click="handleNavigation"
                     class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
@@ -140,42 +161,13 @@
                         <span class="iconify text-2xl" data-icon="mdi:cog"></span>
                     </div>
                     <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
-                        :class="isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
+                        :class="$store.sidebar.isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
                         <span>Pengaturan Akun</span>
-                    </div>
-                </a>
-            </li>
-
-
-            <!-- Manajemen Pengguna -->
-            <a href="{{ route('admin.users.index') }}" @click="handleNavigation"
-                class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
-                <div class="w-14 h-14 flex items-center justify-center flex-shrink-0">
-                    <span class="iconify text-2xl" data-icon="mdi:account-circle"></span>
-                </div>
-                <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
-                    :class="isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
-                    <span>Pengelolaan Akun</span>
-                </div>
-            </a>
-
-
-            <!-- Manajemen Pengguna -->
-            <li>
-                <a href="#" @click="handleNavigation"
-                    class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
-                    <div class="w-14 h-14 flex items-center justify-center flex-shrink-0">
-                        <span class="iconify text-2xl" data-icon="mdi:account-cog"></span>
-                    </div>
-                    <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
-                        :class="isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
-                        <span>Manajemen Pengguna</span>
                     </div>
                 </a>
             </li>
         </ul>
     </nav>
-
     <!-- Logout Button -->
     <div class="mt-4 border-t border-white/20 pt-4">
         <a href="{{ route('logout') }}"
