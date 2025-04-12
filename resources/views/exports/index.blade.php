@@ -119,7 +119,7 @@
                                                                 </td>
                                                             @endfor
                                                             <td class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
-                                                                {{ $student['grade_details']['average_written'] ?? '-' }}
+                                                                {{ $student['average_written'] ?? '-' }}
                                                             </td>
                                                             <!-- Observation scores (Pengamatan) -->
                                                             @for ($i = 0; $i < 5; $i++)
@@ -128,7 +128,7 @@
                                                                 </td>
                                                             @endfor
                                                             <td class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
-                                                                {{ $student['grade_details']['average_observation'] ?? '-' }}
+                                                                {{ $student['average_observation'] ?? '-' }}
                                                             </td>
                                                             <!-- Homework scores (Tugas) -->
                                                             @for ($i = 0; $i < 5; $i++)
@@ -137,21 +137,21 @@
                                                                 </td>
                                                             @endfor
                                                             <td class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
-                                                                {{ $student['grade_details']['average_homework'] ?? '-' }}
+                                                                {{ $student['average_homework'] ?? '-' }}
                                                             </td>
                                                             <!-- Sumatif scores -->
                                                             <td class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
-                                                                {{ $student['grade_details']['midterm_score'] ?? '-' }}
+                                                                {{ $student['midterm_score'] ?? '-' }}
                                                             </td>
                                                             <td class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
-                                                                {{ $student['grade_details']['final_exam_score'] ?? '-' }}
+                                                                {{ $student['final_exam_score'] ?? '-' }}
                                                             </td>
                                                             <!-- Final scores -->
                                                             <td class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
-                                                                {{ $student['grade_details']['final_score'] ?? '-' }}
+                                                                {{ $student['final_score'] ?? '-' }}
                                                             </td>
                                                             <td class="p-2 border border-gray-300 text-sm font-semibold text-center text-gray-900 whitespace-nowrap">
-                                                                {{ $student['grade_details']['grade_letter'] ?? '-' }}
+                                                                {{ $student['grade_letter'] ?? '-' }}
                                                             </td>
                                                         </tr>
                                                     @empty

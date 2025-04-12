@@ -84,33 +84,22 @@ class GradeExportController extends Controller
     
     private function getGradeData($subject_id, $semester, $class_id)
     {
-        // Ambil data pengguna yang login (wali kelas)
-        $user = auth::user();
+        $user = Auth::user();
         
-        // Pastikan pengguna memiliki class_id (kelas yang dikelola)
         if (!$user->class_id) {
-            Log::warning("User does not have an associated class_id", ['user_id' => $user->id]);
             return [];
         }
-
-        // Pastikan class_id yang digunakan adalah kelas yang dikelola oleh wali kelas
+    
         if ($user->class_id != $class_id) {
-            Log::warning("User attempted to access a class they do not manage", [
-                'user_id' => $user->id,
-                'class_id' => $class_id,
-                'user_class_id' => $user->class_id
-            ]);
             return [];
         }
-
+    
         $result = [];
-        $updates = []; // Untuk menyimpan data yang akan di-update
-
-        // Gunakan chunk untuk memproses siswa dalam batch kecil
+        $updates = [];
+    
         Student::where('class_id', $user->class_id)
                ->select('id', 'nis', 'name')
                ->chunk(10, function ($students) use (&$result, &$updates, $subject_id, $semester) {
-                   // Ambil semua grade untuk siswa di batch ini
                    $studentIds = $students->pluck('id')->toArray();
                    $grades = Grade::whereIn('student_id', $studentIds)
                                   ->where('subject_id', $subject_id)
@@ -123,7 +112,7 @@ class GradeExportController extends Controller
                                   }])
                                   ->get()
                                   ->keyBy('student_id');
-
+    
                    foreach ($students as $student) {
                        $studentData = [
                            'student_id' => $student->id,
@@ -132,15 +121,13 @@ class GradeExportController extends Controller
                            'written' => array_fill(0, 5, '-'),
                            'observation' => array_fill(0, 5, '-'),
                            'homework' => array_fill(0, 5, '-'),
-                           'grade_details' => [
-                               'average_written' => null,
-                               'average_observation' => null,
-                               'average_homework' => null,
-                               'midterm_score' => null,
-                               'final_exam_score' => null,
-                               'final_score' => null,
-                               'grade_letter' => '-'
-                           ]
+                           'average_written' => null,
+                           'average_observation' => null,
+                           'average_homework' => null,
+                           'midterm_score' => null,
+                           'final_exam_score' => null,
+                           'final_score' => null,
+                           'grade_letter' => '-' // Pastikan grade_letter selalu ada
                        ];
                        
                        $grade = $grades->get($student->id);
@@ -186,7 +173,6 @@ class GradeExportController extends Controller
                            
                            $finalScore = !empty($components) ? array_sum($components) / count($components) : 0;
                            
-                           // Simpan data untuk update massal
                            $updates[] = [
                                'id' => $grade->id,
                                'average_written' => $averageWritten,
@@ -195,22 +181,19 @@ class GradeExportController extends Controller
                                'final_score' => $finalScore,
                            ];
                            
-                           $studentData['grade_details'] = [
-                               'average_written' => $averageWritten,
-                               'average_observation' => $averageObservation,
-                               'average_homework' => $averageHomework,
-                               'midterm_score' => $grade->midterm_score,
-                               'final_exam_score' => $grade->final_exam_score,
-                               'final_score' => $finalScore,
-                               'grade_letter' => $grade->grade_letter
-                           ];
+                           $studentData['average_written'] = $averageWritten;
+                           $studentData['average_observation'] = $averageObservation;
+                           $studentData['average_homework'] = $averageHomework;
+                           $studentData['midterm_score'] = $grade->midterm_score;
+                           $studentData['final_exam_score'] = $grade->final_exam_score;
+                           $studentData['final_score'] = $finalScore;
+                           $studentData['grade_letter'] = $grade->grade_letter ?? '-';
                        }
                        
                        $result[] = $studentData;
                    }
                });
-
-        // Lakukan update massal untuk semua grade
+    
         foreach ($updates as $update) {
             Grade::where('id', $update['id'])->update([
                 'average_written' => $update['average_written'],
@@ -219,7 +202,7 @@ class GradeExportController extends Controller
                 'final_score' => $update['final_score'],
             ]);
         }
-
+    
         return $result;
     }
     
