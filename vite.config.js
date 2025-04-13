@@ -9,7 +9,7 @@ export default defineConfig({
         }),
     ],
     server: {
-        https: true, // Pastikan Vite mendukung HTTPS
+        https: false, // Pastikan Vite mendukung HTTPS
     },
     build: {
         outDir: 'public/build',

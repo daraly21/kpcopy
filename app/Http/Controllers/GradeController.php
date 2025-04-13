@@ -8,17 +8,20 @@ use App\Models\Subject;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class GradeController extends Controller
 {
     // Menampilkan form input nilai tugas
-    public function create()
-    {
-        $user = Auth::user();
-        $subjects = Subject::all();
-        $students = Student::where('class_id', $user->class_id)->get();
-        return view('grades.create', compact('subjects', 'students'));
-    }
+// Di controller
+public function create()
+{
+    $user = Auth::user();
+    $subjects = Subject::all();
+    $students = Student::where('class_id', $user->class_id)
+                       ->paginate(20); // Tampilkan 20 siswa per halaman
+    return view('grades.create', compact('subjects', 'students'));
+}
 
     // Menyimpan data nilai tugas yang baru
     public function store(Request $request)
@@ -74,24 +77,29 @@ class GradeController extends Controller
             'assignment_type' => 'required|in:written,observation,homework',
             'semester' => 'required|in:odd,even',
         ]);
-     
+    
         $subjectId = $request->subject_id;
         $taskName = $request->task_name;
         $assignmentType = $request->assignment_type;
         $semester = $request->semester;
         $gradeData = json_decode($request->grade_data, true);
     
-        // Simpan nilai hanya untuk siswa di kelas wali kelas
-        $count = 0;
+        // Dapatkan semua ID siswa di kelas wali kelas sekali saja
+        $classStudentIds = Student::where('class_id', $user->class_id)
+                                 ->pluck('id')
+                                 ->toArray();
+        
+        // Siapkan array untuk batch insert
+        $gradeTasks = [];
+        $studentIds = [];
+        
+        // Persiapkan data untuk batch insert
         foreach ($gradeData as $studentId => $score) {
-            // Pastikan siswa berada di kelas wali kelas
-            $student = Student::where('id', $studentId)
-                             ->where('class_id', $user->class_id)
-                             ->first();
-            if (!$student || $score < 0 || $score > 100) {
+            // Skip jika siswa tidak di kelas ini atau nilai tidak valid
+            if (!in_array($studentId, $classStudentIds) || $score < 0 || $score > 100) {
                 continue;
             }
-    
+            
             // Buat atau ambil data grade
             $grade = Grade::updateOrCreate(
                 [
@@ -102,21 +110,33 @@ class GradeController extends Controller
                 ['score' => $score]
             );
     
-            // Simpan nilai ke tabel grade_tasks
-            GradeTask::create([
+            // Siapkan data untuk batch insert
+            $gradeTasks[] = [
                 'subject_id' => $subjectId,
                 'task_name' => $taskName,
                 'score' => $score,
                 'student_id' => $studentId,
                 'type' => $assignmentType,
                 'grades_id' => $grade->id,
-            ]);
-    
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+            
+            $studentIds[] = $studentId;
+        }
+        
+        // Batch insert sekali saja untuk semua data
+        if (!empty($gradeTasks)) {
+            GradeTask::insert($gradeTasks);
+        }
+        
+        // Update rata-rata hanya sekali per siswa
+        $updatedCount = count($studentIds);
+        foreach (array_unique($studentIds) as $studentId) {
             $this->updateAverageGrade($studentId, $subjectId, $semester);
-            $count++;
         }
     
-        return redirect()->back()->with('success', "Berhasil menyimpan nilai untuk {$count} siswa.");
+        return redirect()->back()->with('success', "Berhasil menyimpan nilai untuk {$updatedCount} siswa.");
     }
 
     public function update(Request $request, $id)
@@ -189,28 +209,30 @@ class GradeController extends Controller
     /**
      * Helper method untuk menghitung rata-rata nilai dan update tabel grades
      */
-    private function updateAverageGrade($studentId, $subjectId, $semester)
-    {
-        // Hitung nilai rata-rata dari semua tugas untuk siswa dan mata pelajaran ini
-        $averageScore = GradeTask::where('student_id', $studentId)
-                            ->where('subject_id', $subjectId)
-                            ->avg('score');
-        
-        if ($averageScore) {
-            Grade::updateOrCreate(
-                [
-                    'student_id' => $studentId, 
-                    'subject_id' => $subjectId,
-                    'semester' => $semester
-                ],
-                ['score' => $averageScore]
-            );
-        } else {
-            // If no tasks left, delete the grade record
-            Grade::where('student_id', $studentId)
-                ->where('subject_id', $subjectId)
-                ->where('semester', $semester)
-                ->delete();
-        }
+ // Ganti method updateAverageGrade menjadi lebih efisien
+private function updateAverageGrade($studentId, $subjectId, $semester)
+{
+    // Query yang lebih optimal dengan select yang spesifik
+    $averageScore = GradeTask::where('student_id', $studentId)
+                        ->where('subject_id', $subjectId)
+                        ->select(DB::raw('AVG(score) as average_score'))
+                        ->first();
+
+    if ($averageScore && $averageScore->average_score) {
+        Grade::updateOrCreate(
+            [
+                'student_id' => $studentId, 
+                'subject_id' => $subjectId,
+                'semester' => $semester
+            ],
+            ['score' => $averageScore->average_score]
+        );
+    } else {
+        // If no tasks left, delete the grade record
+        Grade::where('student_id', $studentId)
+            ->where('subject_id', $subjectId)
+            ->where('semester', $semester)
+            ->delete();
     }
+}
 }

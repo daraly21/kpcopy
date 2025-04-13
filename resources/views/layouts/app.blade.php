@@ -56,7 +56,7 @@
                                         <div class="flex items-center">
                                             <div class="mr-2">
                                                 <!-- Gunakan URL dari profile_picture -->
-                                                <img src="{{ Auth::user()->profile_picture ?? asset('images/default-avatar.png') }}"
+                                                <img src="{{ Auth::user()->profile_picture }}"
                                                     alt="{{ Auth::user()->name }}"
                                                     class="rounded-full h-8 w-8 object-cover">
                                             </div>
