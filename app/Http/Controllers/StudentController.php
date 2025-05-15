@@ -36,10 +36,6 @@ class StudentController extends Controller
     // 🔹 Tampilkan form tambah siswa
     public function create(Request $request)
     {
-        $classId = $request->query('class_id');
-        $class = ClassModel::findOrFail($classId);
-
-        return view('students.create', compact('class'));
     }
 
     // 🔹 Simpan siswa
@@ -47,13 +43,13 @@ class StudentController extends Controller
     {
         $request->validate([
             'class_id' => 'required|exists:classes,id',
-            'name' => 'required|string|max:255',
-            'nis' => 'nullable|string|max:50',
+            'name' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'nis' => 'required|numeric|digits_between:1,10',
             'gender' => 'required|in:L,P',
-            'parent_name' => 'nullable|string|max:255',
-            'birth_place' => 'nullable|string|max:255',
-            'birth_date' => 'nullable|date',
-            'parent_phone' => 'required|string|starts_with:62',
+            'parent_name' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'birth_place' => 'required|string|max:255',
+            'birth_date' => 'required|date',
+            'parent_phone' => 'required|numeric|starts_with:62|digits_between:10,13',
         ]);
 
         Student::create($request->all());
@@ -71,21 +67,20 @@ class StudentController extends Controller
     // 🔹 Tampilkan form edit
     public function edit(Student $student)
     {
-        $class = $student->class;
-        return view('students.edit', compact('student', 'class'));
+
     }
 
     // 🔹 Simpan perubahan siswa
     public function update(Request $request, Student $student)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'nis' => 'nullable|string|max:50',
+            'name' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'nis' => 'required|numeric|digits_between:1,10',
             'gender' => 'required|in:L,P',
-            'parent_name' => 'nullable|string|max:255',
-            'birth_place' => 'nullable|string|max:255',
-            'birth_date' => 'nullable|date',
-            'parent_phone' => 'required|string|starts_with:62',
+            'parent_name' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
+            'birth_place' => 'required|string|max:255',
+            'birth_date' => 'required|date',
+            'parent_phone' => 'required|numeric|starts_with:62|digits_between:10,13',
         ]);
 
         $student->update($request->all());

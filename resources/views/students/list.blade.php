@@ -103,212 +103,317 @@
                         <span class="iconify text-indigo-600 text-2xl mr-2" :data-icon="isEdit ? 'mdi:pencil' : 'mdi:plus'"></span>
                     </h3>
         
-                    <form :action="formAction" method="POST" @submit="validateAndSubmit">
-                        @csrf
-                        <input type="hidden" name="_method" x-bind:value="isEdit ? 'PUT' : 'POST'">
-                        <input type="hidden" name="class_id" value="{{ $class->id }}">
-        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <!-- Column 1 -->
-                            <div class="space-y-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-red-500">*</span></label>
-                                    <input type="text" name="name" 
-                                           class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150" 
-                                           x-model="form.name" required>
-                                    <div x-show="errors.name" class="text-red-500 text-xs mt-1" x-text="errors.name"></div>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">NIS</label>
-                                    <input type="text" name="nis" 
-                                           class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150" 
-                                           x-model="form.nis">
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Kelamin <span class="text-red-500">*</span></label>
-                                    <select name="gender" 
-                                            class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150 bg-white" 
-                                            x-model="form.gender" required>
-                                        <option value="L">Laki-laki</option>
-                                        <option value="P">Perempuan</option>
-                                    </select>
-                                </div>
-                            </div>
-        
-                            <!-- Column 2 -->
-                            <div class="space-y-4">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tempat Lahir</label>
-                                        <input type="text" name="birth_place" 
-                                               class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150" 
-                                               x-model="form.birth_place">
-                                    </div>
-                                    
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Lahir</label>
-                                        <input type="date" name="birth_date" 
-                                               class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150" 
-                                               x-model="form.birth_date">
-                                    </div>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orang Tua</label>
-                                    <input type="text" name="parent_name" 
-                                           class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150" 
-                                           x-model="form.parent_name">
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nomor HP Orang Tua <span class="text-red-500">*</span></label>
-                                    <input type="text" name="parent_phone" 
-                                           class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150" 
-                                           x-model="form.parent_phone" placeholder="083113355381" @input="formatPhoneNumber" required>
-                                    <div x-show="errors.parent_phone" class="text-red-500 text-xs mt-1" x-text="errors.parent_phone"></div>
-                                    <span class="text-xs text-gray-500 mt-1 block">Format: Tulis nomor tanpa awalan +62 (contoh: 083113355381)</span>
-                                </div>
-                            </div>
-                        </div>
-        
-                        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                            <button type="button" @click="openModal = false" 
-                                    class="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium">Batal</button>
-                            <button type="submit" 
-                                    class="px-4 py-2 bg-indigo-600 border border-indigo-700 rounded-md text-white hover:bg-indigo-700 transition-all duration-200 font-medium flex items-center">
-                                <span class="iconify text-xl mr-2" data-icon="mdi:content-save"></span>
-                                Simpan
-                            </button>
-                        </div>
-                    </form>
+                   <form :action="formAction" method="POST" @submit="validateAndSubmit">
+    @csrf
+    <input type="hidden" name="_method" x-bind:value="isEdit ? 'PUT' : 'POST'">
+    <input type="hidden" name="class_id" value="{{ $class->id }}">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Column 1 -->
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nama <span class="text-red-500">*</span></label>
+                <input type="text" name="name" pattern="[a-zA-Z\s]+"
+                       title="Hanya huruf dan spasi yang diperbolehkan"
+                       placeholder="Nama Siswa"
+                       class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150" 
+                       x-model="form.name" required>
+                <div x-show="errors.name" class="text-red-500 text-xs mt-1" x-text="errors.name"></div>
+                @error('name')
+                    <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
+                @enderror
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">NIS <span class="text-red-500">*</span></label>
+                <input type="number" name="nis" pattern="\d*"
+                       title="Hanya angka yang diperbolehkan"
+                       class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150" 
+                       x-model="form.nis" required>
+                <div x-show="errors.nis" class="text-red-500 text-xs mt-1" x-text="errors.nis"></div>
+                @error('nis')
+                    <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
+                @enderror
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Kelamin <span class="text-red-500">*</span></label>
+                <select name="gender" 
+                        class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150 bg-white" 
+                        x-model="form.gender" required>
+                    <option value="">Pilih Jenis Kelamin</option>
+                    <option value="L">Laki-laki</option>
+                    <option value="P">Perempuan</option>
+                </select>
+                <div x-show="errors.gender" class="text-red-500 text-xs mt-1" x-text="errors.gender"></div>
+                @error('gender')
+                    <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
+                @enderror
+            </div>
+        </div>
+
+        <!-- Column 2 -->
+        <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tempat Lahir <span class="text-red-500">*</span></label>
+                    <input type="text" name="birth_place" 
+                           class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150" 
+                           x-model="form.birth_place" required>
+                    <div x-show="errors.birth_place" class="text-red-500 text-xs mt-1" x-text="errors.birth_place"></div>
+                    @error('birth_place')
+                        <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Lahir <span class="text-red-500">*</span></label>
+                    <input type="date" name="birth_date" 
+                           class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150" 
+                           x-model="form.birth_date" required>
+                    <div x-show="errors.birth_date" class="text-red-500 text-xs mt-1" x-text="errors.birth_date"></div>
+                    @error('birth_date')
+                        <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Orang Tua <span class="text-red-500">*</span></label>
+                <input type="text" name="parent_name" pattern="[a-zA-Z\s]+"
+                       title="Hanya huruf dan spasi yang diperbolehkan"
+                       class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150" 
+                       x-model="form.parent_name" required>
+                <div x-show="errors.parent_name" class="text-red-500 text-xs mt-1" x-text="errors.parent_name"></div>
+                @error('parent_name')
+                    <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
+                @enderror
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nomor HP Orang Tua <span class="text-red-500">*</span></label>
+                <input type="number" name="parent_phone" pattern="\d*"
+                       title="Hanya angka yang diperbolehkan"
+                       class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150" 
+                       x-model="form.parent_phone" placeholder="083113355381" @input="formatPhoneNumber" required>
+                <div x-show="errors.parent_phone" class="text-red-500 text-xs mt-1" x-text="errors.parent_phone"></div>
+                @error('parent_phone')
+                    <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
+                @enderror
+                <span class="text-xs text-gray-500 mt-1 block">Format: Tulis nomor tanpa awalan +62 (contoh: 083113355381)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+        <button type="button" @click="openModal = false" 
+                class="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium">Batal</button>
+        <button type="submit" 
+                class="px-4 py-2 bg-indigo-600 border border-indigo-700 rounded-md text-white hover:bg-indigo-700 transition-all duration-200 font-medium flex items-center">
+            <span class="iconify text-xl mr-2" data-icon="mdi:content-save"></span>
+            Simpan
+        </button>
+    </div>
+</form>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-    function studentManager() {
-        return {
-            openModal: false,
-            isEdit: false,
-            form: {
+   <script>
+function studentManager() {
+    return {
+        openModal: false,
+        isEdit: false,
+        form: {
+            name: '',
+            nis: '',
+            gender: '',
+            parent_name: '',
+            birth_place: '',
+            birth_date: '',
+            parent_phone: ''
+        },
+        errors: {
+            name: '',
+            nis: '',
+            gender: '',
+            parent_name: '',
+            birth_place: '',
+            birth_date: '',
+            parent_phone: ''
+        },
+        formAction: '{{ route('admin.siswa.store') }}',
+        
+        openAddModal() {
+            this.isEdit = false;
+            this.form = {
                 name: '',
                 nis: '',
-                gender: 'L',
+                gender: '',
                 parent_name: '',
                 birth_place: '',
                 birth_date: '',
                 parent_phone: ''
-            },
-            errors: {
+            };
+            this.errors = {
                 name: '',
+                nis: '',
+                gender: '',
+                parent_name: '',
+                birth_place: '',
+                birth_date: '',
                 parent_phone: ''
-            },
-            formAction: '{{ route('admin.siswa.store') }}',
+            };
+            this.formAction = '{{ route('admin.siswa.store') }}';
+            this.openModal = true;
+        },
+        
+        openEditModal(student) {
+            this.isEdit = true;
+            this.form = { ...student };
             
-            openAddModal() {
-                this.isEdit = false;
-                this.form = {
-                    name: '',
-                    nis: '',
-                    gender: 'L',
-                    parent_name: '',
-                    birth_place: '',
-                    birth_date: '',
-                    parent_phone: ''
-                };
-                this.errors = {
-                    name: '',
-                    parent_phone: ''
-                };
-                this.formAction = '{{ route('admin.siswa.store') }}';
-                this.openModal = true;
-            },
+            // Ubah format nomor telepon dari 628xxx menjadi 08xxx untuk tampilan
+            if (this.form.parent_phone && this.form.parent_phone.startsWith('62')) {
+                this.form.parent_phone = '0' + this.form.parent_phone.substring(2);
+            }
             
-            openEditModal(student) {
-                this.isEdit = true;
-                this.form = { ...student };
-                
-                // Ubah format nomor telepon dari 628xxx menjadi 08xxx untuk tampilan
-                if (this.form.parent_phone && this.form.parent_phone.startsWith('62')) {
-                    this.form.parent_phone = '0' + this.form.parent_phone.substring(2);
-                }
-                
-                this.errors = {
-                    name: '',
-                    parent_phone: ''
-                };
-                this.formAction = '/admin/siswa/' + student.id;
-                this.openModal = true;
-            },
+            this.errors = {
+                name: '',
+                nis: '',
+                gender: '',
+                parent_name: '',
+                birth_place: '',
+                birth_date: '',
+                parent_phone: ''
+            };
+            this.formAction = '{{ route('admin.siswa.update', ':id') }}'.replace(':id', student.id);
+            this.openModal = true;
+        },
+        
+        // Format nomor telepon untuk input
+        formatPhoneNumber() {
+            let phone = this.form.parent_phone.replace(/\D/g, '');
+            if (phone.startsWith('62')) {
+                phone = '0' + phone.substring(2);
+            }
+            this.form.parent_phone = phone;
+        },
+        
+        // Format untuk penyimpanan (62xxx)
+        formatPhoneNumberForStorage() {
+            let phoneNumber = this.form.parent_phone.replace(/\D/g, '');
             
-            // Format untuk penyimpanan (62xxx)
-            formatPhoneNumberForStorage() {
-                let phoneNumber = this.form.parent_phone.replace(/\D/g, '');
-                
-                // Jika diawali dengan 0, ganti dengan 62
-                if (phoneNumber.startsWith('0')) {
-                    phoneNumber = '62' + phoneNumber.substring(1);
-                }
-                // Jika belum diawali dengan 62 atau 0
-                else if (!phoneNumber.startsWith('62') && phoneNumber.length > 0) {
-                    phoneNumber = '62' + phoneNumber;
-                }
-                
-                return phoneNumber;
-            },
+            // Jika diawali dengan 0, ganti dengan 62
+            if (phoneNumber.startsWith('0')) {
+                phoneNumber = '62' + phoneNumber.substring(1);
+            }
+            // Jika belum diawali dengan 62 atau 0
+            else if (!phoneNumber.startsWith('62') && phoneNumber.length > 0) {
+                phoneNumber = '62' + phoneNumber;
+            }
             
-            validateAndSubmit(e) {
-                let valid = true;
-                this.errors = {
-                    name: '',
-                    parent_phone: ''
-                };
-                
-                // Validasi nama
-                if (!this.form.name || this.form.name.trim() === '') {
-                    this.errors.name = 'Nama tidak boleh kosong';
+            return phoneNumber;
+        },
+        
+        validateAndSubmit(e) {
+            let valid = true;
+            this.errors = {
+                name: '',
+                nis: '',
+                gender: '',
+                parent_name: '',
+                birth_place: '',
+                birth_date: '',
+                parent_phone: ''
+            };
+            
+            // Validasi nama
+            if (!this.form.name || this.form.name.trim() === '') {
+                this.errors.name = 'Nama tidak boleh kosong';
+                valid = false;
+            } else if (!/^[a-zA-Z\s]+$/.test(this.form.name)) {
+                this.errors.name = 'Nama hanya boleh berisi huruf dan spasi';
+                valid = false;
+            }
+            
+            // Validasi NIS
+            if (!this.form.nis || this.form.nis.trim() === '') {
+                this.errors.nis = 'NIS tidak boleh kosong';
+                valid = false;
+            } else if (!/^\d+$/.test(this.form.nis)) {
+                this.errors.nis = 'NIS hanya boleh berisi angka';
+                valid = false;
+            } else if (this.form.nis.length > 10) {
+                this.errors.nis = 'NIS maksimal 10 digit';
+                valid = false;
+            }
+            
+            // Validasi jenis kelamin
+            if (!this.form.gender) {
+                this.errors.gender = 'Jenis kelamin harus dipilih';
+                valid = false;
+            }
+            
+            // Validasi nama orang tua
+            if (!this.form.parent_name || this.form.parent_name.trim() === '') {
+                this.errors.parent_name = 'Nama orang tua tidak boleh kosong';
+                valid = false;
+            } else if (!/^[a-zA-Z\s]+$/.test(this.form.parent_name)) {
+                this.errors.parent_name = 'Nama orang tua hanya boleh berisi huruf dan spasi';
+                valid = false;
+            }
+            
+            // Validasi tempat lahir
+            if (!this.form.birth_place || this.form.birth_place.trim() === '') {
+                this.errors.birth_place = 'Tempat lahir tidak boleh kosong';
+                valid = false;
+            }
+            
+            // Validasi tanggal lahir
+            if (!this.form.birth_date) {
+                this.errors.birth_date = 'Tanggal lahir tidak boleh kosong';
+                valid = false;
+            }
+            
+            // Validasi nomor HP
+            if (!this.form.parent_phone || this.form.parent_phone.trim() === '') {
+                this.errors.parent_phone = 'Nomor HP tidak boleh kosong';
+                valid = false;
+            } else {
+                const cleanedPhone = this.form.parent_phone.replace(/\D/g, '');
+                if (!/^\d+$/.test(cleanedPhone)) {
+                    this.errors.parent_phone = 'Nomor HP hanya boleh berisi angka';
+                    valid = false;
+                } else if (cleanedPhone.length < 10 || cleanedPhone.length > 13) {
+                    this.errors.parent_phone = 'Nomor HP harus antara 10-13 digit';
                     valid = false;
                 }
+            }
+            
+            if (valid) {
+                // Format nomor telepon untuk penyimpanan sebelum submit
+                const formattedPhone = this.formatPhoneNumberForStorage();
                 
-                // Validasi nomor hp
-                if (!this.form.parent_phone) {
-                    this.errors.parent_phone = 'Nomor HP tidak boleh kosong';
-                    valid = false;
-                } else {
-                    // Validasi format
-                    const cleanedPhone = this.form.parent_phone.replace(/\D/g, '');
-                    if (cleanedPhone.length < 10) {
-                        this.errors.parent_phone = 'Nomor HP terlalu pendek';
-                        valid = false;
-                    }
-                }
+                // Buat elemen input tersembunyi untuk menyimpan nomor yang sudah diformat
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'parent_phone';
+                hiddenInput.value = formattedPhone;
                 
-                if (valid) {
-                    // Format nomor telepon untuk penyimpanan sebelum submit
-                    const formattedPhone = this.formatPhoneNumberForStorage();
-                    
-                    // Buat elemen input tersembunyi untuk menyimpan nomor yang sudah diformat
-                    const hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = 'parent_phone';
-                    hiddenInput.value = formattedPhone;
-                    
-                    // Tambahkan ke form
-                    e.target.appendChild(hiddenInput);
-                    
-                    // Ubah name dari input yang terlihat agar tidak bentrok
-                    const visibleInput = e.target.querySelector('input[name="parent_phone"]');
-                    if (visibleInput) {
-                        visibleInput.name = 'parent_phone_display';
-                    }
-                } else {
-                    e.preventDefault();
+                // Tambahkan ke form
+                e.target.appendChild(hiddenInput);
+                
+                // Ubah name dari input yang terlihat agar tidak bentrok
+                const visibleInput = e.target.querySelector('input[name="parent_phone"]');
+                if (visibleInput) {
+                    visibleInput.name = 'parent_phone_display';
                 }
+            } else {
+                e.preventDefault();
             }
         }
     }
-    </script>
+}
+</script>
 </x-app-layout>

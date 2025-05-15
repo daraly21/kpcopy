@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Laravel</title>
+    <title>Website Pengelolaan Nilai Siswa</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -57,32 +57,29 @@
 <body class="bg-gray-100">
     <!-- Navbar -->
     @if (Route::has('login'))
-        <nav class="bg-white shadow-lg fixed w-full top-0 z-50 bg-opacity-85">
-            <div class="max-w-6xl mx-auto px-4">
-                <div class="flex justify-between items-center py-4">
-                    <div class="text-xl font-semibold text-slate-900 ml-3">
-                        Ini Text dan logo sekolah
-                    </div>
-                    <div class="flex space-x-4 mr-4">
-                        @auth
-                            <a href="{{ url('/dashboard') }}" class="text-slate-900 hover:text-red-800">
-                                Dashboard
-                            </a>
-                        @else
-                            <a href="{{ route('login') }}" class="text-slate-900 hover:text-red-800">
-                                Log in
-                            </a>
-
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="text-slate-900 hover:text-blue-600">
-                                    Register
-                                </a>
-                            @endif
-                        @endauth
-                    </div>
-                </div>
+       <nav class="bg-white shadow-lg fixed w-full top-0 z-50 bg-opacity-85">
+    <div class="max-w-6xl mx-auto px-7">
+        <div class="flex justify-between items-center py-4">
+            <div class="flex items-end">
+                <img src="https://ucarecdn.com/140db37d-4117-4b98-bc00-20e8d0147903/WhatsApp_Image_20250430_at_105328_AM__1_removebgpreview.png" 
+                     alt="Logo Sekolah" 
+                     class="h-8 w-8 mr-3">
+                <span class="text-xl font-semibold text-slate-900">SDN Cijedil</span>
             </div>
-        </nav>
+            <div class="flex space-x-4 mr-4">
+                @auth
+                    <a href="{{ url('/dashboard') }}" class="text-slate-900 hover:text-red-800">
+                        Dashboard
+                    </a>
+                @else
+                    <a href="{{ route('login') }}" class="text-slate-900 hover:text-red-800">
+                        Log in
+                    </a>
+                @endauth
+            </div>
+        </div>
+    </div>
+</nav>
     @endif
 
 
@@ -111,7 +108,7 @@
             <div class="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-10">
 
                 <div class="text-center text-white px-4">
-                    <h1 class="text-4xl md:text-5xl font-bold mt-10">Selamat Datang di Nama Sekolah</h1>
+                    <h1 class="text-4xl md:text-5xl font-bold mt-10">Selamat Datang di SDN CIJEDIL</h1>
                     <p class="text-lg md:text-xl mt-2">Sekolah Unggulan dengan Berbagai Prestasi Gemilang</p>
                     <a href="#tentang" class="bg-white text-black px-6 py-3 rounded-full font-semibold hover:bg-slate-200 inline-block mt-4">Pelajari Lebih Lanjut</a>
                 </div>
@@ -130,7 +127,7 @@
                         </span>
                     </h2>
                     <p class="text-gray-700 text-lg mb-6 leading-relaxed">
-                        Nama Sekolah adalah sekolah yang berkomitmen untuk memberikan pendidikan terbaik kepada siswa-siswinya. Dengan fasilitas modern dan tenaga pengajar yang berkualitas, kami siap mencetak generasi unggul.
+                        SDN Cijedil adalah sekolah yang berkomitmen untuk memberikan pendidikan terbaik kepada siswa-siswinya. Dengan fasilitas modern dan tenaga pengajar yang berkualitas, kami siap mencetak generasi unggul.
                     </p>
                     <p class="text-gray-700 text-lg leading-relaxed">
                         Kami memiliki kurikulum yang komprehensif dan program ekstrakurikuler yang beragam untuk mengembangkan potensi siswa secara maksimal, baik dalam bidang akademik maupun non-akademik.
@@ -159,7 +156,7 @@
                     <div class="md:w-1/2 w-full h-96 rounded-lg overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
                         <iframe 
                             class="w-full h-full"
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3162.104042381849!2d126.977732315647!3d37.56653527980046!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x357ca2c74aeddea1%3A0x8b21a8c6b98b3b7d!2sSeoul%2C%20Korea%20Selatan!5e0!3m2!1sid!2sid!4v1698765432100!5m2!1sid!2sid"
+                            src="https://maps.google.com/maps?width=600&height=400&hl=en&q=-6.802717995227342%2C%20107.09502799871493&t=&z=16&ie=UTF8&iwloc=B&output=embed"
                             allowfullscreen=""
                             loading="lazy"
                             referrerpolicy="no-referrer-when-downgrade">
@@ -178,12 +175,12 @@
                             Sekolah kami berlokasi di area yang strategis dan mudah diakses dari berbagai wilayah. Dengan lingkungan yang nyaman dan fasilitas lengkap, kami memastikan siswa dapat belajar dengan optimal.
                         </p>
                         <p class="text-gray-700 text-lg mb-6 leading-relaxed">
-                            Alamat lengkap: Jl. Pendidikan No. 123, Kota Malang, Jawa Timur. Silakan kunjungi kami atau hubungi untuk informasi lebih lanjut.
+                            Alamat lengkap: Kp.Banjarpinang RT./RW. KABUPATEN CIANJUR. Silakan kunjungi kami atau hubungi untuk informasi lebih lanjut.
                         </p>
                         <!-- Tombol Arahkan Saya -->
                         <div class="flex justify-end mt-8">
                             <a 
-                                href="https://www.google.com/maps?q=Jl.+Pendidikan+No.+123,+Kota+Malang,+Jawa+Timur" 
+                                href="https://maps.app.goo.gl/u66dQwmRfinvVXPN9" 
                                 target="_blank" 
                                 class="inline-flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-slate-900 transition-all duration-300 shadow-lg">
                                 <span class="iconify mr-2" data-icon="mdi:map-marker" data-width="24" data-height="24"></span>
@@ -206,43 +203,43 @@
                     <!-- Kartu Kepala Sekolah -->
                     <div class="flex-shrink-0 w-64 bg-gray-50 p-6 rounded-lg shadow-lg text-center transition-all hover:shadow-xl hover:transform hover:-translate-y-2">
                         <img src="https://cdn.mos.cms.futurecdn.net/HQYEyLWmndywnfzg4xnQ5R-1200-80.jpg" alt="Kepala Sekolah" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">John Doe</h3>
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Nia Kurniawati, S.Pd.,M.Pd</h3>
                         <p class="text-gray-700">Kepala Sekolah</p>
                     </div>
                     <!-- Kartu Guru 1 -->
                     <div class="flex-shrink-0 w-64 bg-gray-50 p-6 rounded-lg shadow-lg text-center transition-all hover:shadow-xl hover:transform hover:-translate-y-2">
-                        <img src="https://cdn.mos.cms.futurecdn.net/HQYEyLWmndywnfzg4xnQ5R-1200-80.jpg" alt="Guru 1" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Jane Smith</h3>
+                        <img src="https://ucarecdn.com/dd7dc762-76f8-41b2-a69b-cedd9403704e/WhatsAppImage20250430at115437AM.jpeg" alt="Guru 1" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover object-top">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Dewi Asti Cahya Pelangi, S.Pd</h3>
                         <p class="text-gray-700">Guru Kelas 1</p>
                     </div>
                     <!-- Kartu Guru 2 -->
                     <div class="flex-shrink-0 w-64 bg-gray-50 p-6 rounded-lg shadow-lg text-center transition-all hover:shadow-xl hover:transform hover:-translate-y-2">
                         <img src="https://cdn.mos.cms.futurecdn.net/HQYEyLWmndywnfzg4xnQ5R-1200-80.jpg" alt="Guru 2" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Alice Johnson</h3>
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Siti Triani Wahidah, S.Pd</h3>
                         <p class="text-gray-700">Guru Kelas 2</p>
                     </div>
                     <!-- Kartu Guru 3 -->
                     <div class="flex-shrink-0 w-64 bg-gray-50 p-6 rounded-lg shadow-lg text-center transition-all hover:shadow-xl hover:transform hover:-translate-y-2">
-                        <img src="https://cdn.mos.cms.futurecdn.net/HQYEyLWmndywnfzg4xnQ5R-1200-80.jpg" alt="Guru 3" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Bob Brown</h3>
+                        <img src="https://ucarecdn.com/dd950847-effb-4e45-aa8f-94d63032a272/WhatsAppImage20250430at93116AM.jpeg" alt="Guru 3" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover object-top relative top-2">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Jejen, S.Pd.I</h3>
                         <p class="text-gray-700">Guru Kelas 3</p>
                     </div>
                     <!-- Kartu Guru 4 -->
                     <div class="flex-shrink-0 w-64 bg-gray-50 p-6 rounded-lg shadow-lg text-center transition-all hover:shadow-xl hover:transform hover:-translate-y-2">
                         <img src="https://cdn.mos.cms.futurecdn.net/HQYEyLWmndywnfzg4xnQ5R-1200-80.jpg" alt="Guru 4" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Eva Green</h3>
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Yudi Sugihartono, S.Pd</h3>
                         <p class="text-gray-700">Guru Kelas 4</p>
                     </div>
                     <!-- Kartu Guru 5 -->
                     <div class="flex-shrink-0 w-64 bg-gray-50 p-6 rounded-lg shadow-lg text-center transition-all hover:shadow-xl hover:transform hover:-translate-y-2">
-                        <img src="https://cdn.mos.cms.futurecdn.net/HQYEyLWmndywnfzg4xnQ5R-1200-80.jpg" alt="Guru 5" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Michael Lee</h3>
+                        <img src="https://ucarecdn.com/c95f0d41-eac4-4618-be34-71f3c44d8d87/WhatsAppImage20250430at93111AM.jpeg" alt="Guru 5" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Ami Abdurahman Manggis, S.Pd</h3>
                         <p class="text-gray-700">Guru Kelas 5</p>
                     </div>
                     <!-- Kartu Guru 6 -->
                     <div class="flex-shrink-0 w-64 bg-gray-50 p-6 rounded-lg shadow-lg text-center transition-all hover:shadow-xl hover:transform hover:-translate-y-2">
                         <img src="https://cdn.mos.cms.futurecdn.net/HQYEyLWmndywnfzg4xnQ5R-1200-80.jpg" alt="Guru 6" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
-                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Sarah Connor</h3>
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Rd. Eris Setiariswanda, S.Pd</h3>
                         <p class="text-gray-700">Guru Kelas 6</p>
                     </div>
                 </div>

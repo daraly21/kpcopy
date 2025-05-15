@@ -14,7 +14,7 @@
             z-index: 10;
         }
     </style>
-<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+ @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans text-gray-900 antialiased">
     <div class="relative min-h-screen w-full">
@@ -25,7 +25,7 @@
 
             <!-- Navbar -->
             <div class="absolute top-6 left-6 flex items-center z-10 px-3">
-                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEium4wXO9XSBY9kNJgBmFxlOEgKk4tOaOrnWOM3LL3NG4PAEMnb9vbunblwPifY72AM_AhW6iJJ9EAxSPDc20S8Xp0-csqDlGVk3e-YXTwdbE5EUmrkyXDKWU2OIg_5EG_Dg27xjuyfn_EP/s1600/Logo+Tut+Wuri+Handayani.png" alt="Logo SDN CIJEDIL" class="w-10 h-10">
+                <img src="https://ucarecdn.com/140db37d-4117-4b98-bc00-20e8d0147903/WhatsApp_Image_20250430_at_105328_AM__1_removebgpreview.png" alt="Logo SDN CIJEDIL" class="w-10 h-10">
                 <span class="text-white font-semibold ml-2 text-lg">SDN CIJEDIL</span>
             </div>
 
@@ -119,18 +119,6 @@
                 </button>
             </form>
 
-            <!-- Tautan Daftar -->
-            <div class="text-center mt-6">
-                <span class="text-blue-200 text-sm">Belum punya akun?</span>
-                @if (Route::has('register'))
-                    <a 
-                        href="{{ route('register') }}" 
-                        class="text-white ml-1 hover:underline"
-                    >
-                        Daftar
-                    </a>
-                @endif
-            </div>
         </div>
     </div>
 </body>
