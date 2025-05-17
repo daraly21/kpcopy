@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Rekap Nilai') }}
+                {{ __('Daftar Nilai') }}
                 @if (isset($className))
                     <span class="text-blue-600">{{ $className }}</span>
                 @endif
@@ -24,7 +24,7 @@
                         {{-- Pilihan Mata Pelajaran & Jenis Tugas jika kelas sudah dipilih --}}
                         @if ($class_id)
                             <div>
-                                <form action="{{ route('grades.recap') }}" method="GET" id="filterForm"
+                                <form action="{{ route('grades.list') }}" method="GET" id="filterForm"
                                     class="space-y-2">
                                     <input type="hidden" name="class_id" value="{{ $class_id }}">
                                     <label for="subject_id" class="block text-sm font-medium text-gray-700">Mata
@@ -44,7 +44,7 @@
                             </div>
 
                             <div>
-                                <form action="{{ route('grades.recap') }}" method="GET" id="taskForm"
+                                <form action="{{ route('grades.list') }}" method="GET" id="taskForm"
                                     class="space-y-2">
                                     <input type="hidden" name="class_id" value="{{ $class_id }}">
                                     @if ($selectedSubject)

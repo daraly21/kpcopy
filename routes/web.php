@@ -5,10 +5,11 @@ use App\Http\Controllers\ClassController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\GradeExportController;
-use App\Http\Controllers\GradeReportController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfilePictureController;
+use App\Http\Controllers\RapotController;
+use App\Http\Controllers\RecapController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WaliKelasStudentController;
@@ -60,25 +61,24 @@ Route::middleware(['auth', 'role:Admin'])
 // 🧑‍🏫 WALI KELAS ONLY
 // =====================
 Route::middleware(['auth', 'role:Wali Kelas'])->group(function () {
-    // 🎯 Input Nilai
+
+    Route::get('rekap-nilai', [GradeController::class, 'index'])->name('grades.list');
+    Route::post('grades/export', [GradeController::class, 'export'])->name('grades.export');
     Route::get('grades/create', [GradeController::class, 'create'])->name('grades.create');
     Route::post('grades/store', [GradeController::class, 'store'])->name('grades.store');
     Route::post('grades/batch', [GradeController::class, 'store_batch'])->name('grades.store_batch');
     Route::put('grade-tasks/{id}', [GradeController::class, 'update'])->name('grade_tasks.update');
     Route::delete('grade-tasks/{id}', [GradeController::class, 'destroy'])->name('grade_tasks.destroy');
 
-    // 📊 Rekap Nilai
-    Route::get('rekap-nilai', [GradeReportController::class, 'index'])->name('grades.recap');
-    Route::post('grades/export', [GradeReportController::class, 'export'])->name('grades.export');
-
+    Route::get('rapor', [RapotController::class, 'index'])->name('rapor.index');
     // 🔔 Notifikasi
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/send', [NotificationController::class, 'sendNotification'])->name('notifications.send');
     Route::post('notifications/reset', [NotificationController::class, 'resetNotificationStatus'])->name('notifications.reset');
 
     // Expirt Nilai
-    Route::get('/grades/export', [GradeExportController::class, 'index'])->name('grades.export');
-    Route::post('/grades/generate-export', [GradeExportController::class, 'generateExport'])->name('grades.generate-export');
+    Route::get('/grades/export', [RecapController::class, 'index'])->name('grades.export');
+    Route::post('/grades/generate-export', [RecapController::class, 'generateExport'])->name('grades.generate-export');
     
    // 📱 Manajemen Data Siswa (tambahan baru)
    Route::get('kelas/{classId}/students', [WaliKelasStudentController::class, 'index'])->name('walikelas.students.index');

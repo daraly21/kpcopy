@@ -14,7 +14,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
-class GradeExportController extends Controller
+class RecapController extends Controller
 {
     public function index()
     {
@@ -37,7 +37,7 @@ class GradeExportController extends Controller
             }
         }
         
-        return view('exports.index', compact('class', 'subjects', 'studentsData', 'selectedSubject', 'selectedSemester'));
+        return view('recap.index', compact('class', 'subjects', 'studentsData', 'selectedSubject', 'selectedSemester'));
     }
 
     public function exportPDF(Request $request)
@@ -50,7 +50,7 @@ class GradeExportController extends Controller
         $class = ClassModel::find($class_id);
         $data = $this->getGradeData($subject_id, $semester, $class_id);
         
-        $pdf = PDF::loadView('exports.grade_pdf', [
+        $pdf = PDF::loadView('recap.grade_pdf', [
             'data' => $data,
             'subject' => $subject,
             'class' => $class,

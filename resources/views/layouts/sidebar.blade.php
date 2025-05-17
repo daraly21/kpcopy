@@ -92,14 +92,14 @@
             <!-- Rekap Nilai (Tampil untuk Wali Kelas) -->
             @if (auth()->user()->hasRole('Wali Kelas'))
             <li>
-                <a href="{{ route('grades.recap') }}" @click="handleNavigation"
+                <a href="{{ route('grades.list') }}" @click="handleNavigation"
                     class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
                     <div class="w-14 h-14 flex items-center justify-center flex-shrink-0">
                         <span class="iconify text-2xl" data-icon="mdi:file-chart"></span>
                     </div>
                     <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
                         :class="$store.sidebar.isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
-                        <span>Rekap Nilai</span>
+                        <span>Daftar Nilai</span>
                     </div>
                 </a>
             </li>
@@ -131,7 +131,23 @@
                     </div>
                     <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
                         :class="$store.sidebar.isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
-                        <span>Export Data</span>
+                        <span>Rekap Nilai</span>
+                    </div>
+                </a>
+            </li>
+            @endif
+
+                    <!-- Notifikasi (Tampil untuk Wali Kelas) -->
+            @if (auth()->user()->hasRole('Wali Kelas'))
+            <li>
+                <a href="{{ route('rapor.index') }}" @click="handleNavigation"
+                    class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
+                    <div class="w-14 h-14 flex items-center justify-center flex-shrink-0">
+                        <span class="iconify text-2xl" data-icon="mdi:cellphone-message"></span>
+                    </div>
+                    <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
+                        :class="$store.sidebar.isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
+                        <span>dev</span>
                     </div>
                 </a>
             </li>

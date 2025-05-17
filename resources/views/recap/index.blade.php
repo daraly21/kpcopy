@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">Export Nilai Siswa</h2>
+        <h2 class="text-xl font-semibold leading-tight text-gray-800">Rekap Nilai Siswa</h2>
     </x-slot>
     <style>
         .hide-scrollbar::-webkit-scrollbar {
