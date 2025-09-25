@@ -98,16 +98,46 @@ Route::middleware(['auth', 'role:Wali Kelas'])->group(function () {
 });
 
 
-Route::middleware(['auth', 'role:Guru Mata Pelajaran', 'permission:kelola nilai'])->group(function () {
-    // Teacher grade management routes
-    Route::get('teacher/grades/{subjectId}', [TeacherGradeController::class, 'index'])->name('teacher.grades.index');
-    Route::post('teacher/grades', [TeacherGradeController::class, 'store'])->name('teacher.grades.store');
-    Route::post('teacher/grades/batch', [TeacherGradeController::class, 'storeBatch'])->name('teacher.grades.store-batch');
-    Route::put('teacher/grades/{gradeId}', [TeacherGradeController::class, 'update'])->name('teacher.grades.update');
-    Route::delete('teacher/grades/{gradeId}', [TeacherGradeController::class, 'destroy'])->name('teacher.grades.destroy');
+// Route::middleware(['auth', 'role:Guru Mata Pelajaran', 'permission:kelola nilai'])->group(function () {
+//     // Teacher grade management routes
+
+//     Route::get('teacher/grades/select-class', [TeacherGradeController::class, 'selectClass'])->name('teacher.grades.select-class');
+//     Route::get('teacher/grades/{subjectId}/create', [TeacherGradeController::class, 'create'])
+//         ->name('teacher.grades.create');
+//     Route::post('teacher/grades/{subjectId}', [TeacherGradeController::class, 'store'])
+//         ->name('teacher.grades.store');
+//     Route::get('teacher/grades/{subjectId}', [TeacherGradeController::class, 'index'])->name('teacher.grades.index');
+
+//     Route::post('teacher/grades/batch', [TeacherGradeController::class, 'storeBatch'])->name('teacher.grades.store-batch');
+//     Route::put('teacher/grades/{gradeId}', [TeacherGradeController::class, 'update'])->name('teacher.grades.update');
+//     Route::delete('teacher/grades/{gradeId}', [TeacherGradeController::class, 'destroy'])->name('teacher.grades.destroy');
+// });
+
+Route::middleware(['auth'])->prefix('teacher')->name('teacher.')->group(function () {
+    
+    // Teacher Grades Management Routes
+    Route::prefix('grades')->name('grades.')->group(function () {
+        // Select class page
+        Route::get('/select-class', [TeacherGradeController::class, 'selectClass'])->name('select-class');
+        
+        // Create grades page
+        Route::get('/{subjectId}/create', [TeacherGradeController::class, 'create'])->name('create');
+        
+        // Store batch grades (untuk form create)
+        Route::post('/store-batch', [TeacherGradeController::class, 'storeBatch'])->name('store-batch');
+        
+        // Main grades index page
+        Route::get('/{subjectId}', [TeacherGradeController::class, 'index'])->name('index');
+        
+        // Individual grade operations (AJAX)
+        Route::post('/{subjectId}/store', [TeacherGradeController::class, 'store'])->name('store');
+        Route::put('/{id}', [TeacherGradeController::class, 'update'])->name('update');
+        Route::delete('/{id}', [TeacherGradeController::class, 'destroy'])->name('destroy');
+        
+        // Get student grades for modal
+        Route::get('/student/{studentId}/grades', [TeacherGradeController::class, 'getStudentGrades'])->name('student.grades');
+    });
 });
-
-
 
 // =====================
 // PROFILE (Semua User Login)

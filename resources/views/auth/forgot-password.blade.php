@@ -17,7 +17,7 @@
                     </div>
                     <h2 class="text-xl font-bold text-gray-800">Lupa Kata Sandi?</h2>
                     <p class="mt-2 text-sm text-gray-500 max-w-xs mx-auto leading-relaxed">
-                        {{ __('Masukkan alamat email Anda untuk menerima tautan pengaturan ulang kata sandi.') }}
+                        {{ __('Hubungi dapodik jika anda lupa password dan email.') }}
                     </p>
                 </div>
                 
@@ -25,7 +25,7 @@
                 <x-auth-session-status class="mb-4 text-center text-sm font-medium text-green-600" :status="session('status')" />
                 
                 <!-- Form -->
-                <form method="POST" action="{{ route('password.email') }}" class="space-y-5">
+                {{-- <form method="POST" action="{{ route('password.email') }}" class="space-y-5">
                     @csrf
                     
                     <!-- Email Input -->
@@ -49,7 +49,7 @@
                             {{ __('Kirim Tautan Reset') }}
                         </button>
                     </div>
-                </form>
+                </form> --}}
                 
                 <!-- Divider -->
                 <div class="relative mt-8 mb-6">

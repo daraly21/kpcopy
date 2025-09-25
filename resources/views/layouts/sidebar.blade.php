@@ -57,7 +57,7 @@
             @endif
 
             <!-- Manajemen Siswa (Wali Kelas) -->
-            @if (auth()->user()->hasRole('Wali Kelas'))
+            {{-- @if (auth()->user()->hasRole('Wali Kelas'))
             <li>
                 <a href="{{ route('walikelas.students.index', ['classId' => auth()->user()->class_id]) }}" @click="handleNavigation"
                     class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
@@ -70,7 +70,7 @@
                     </div>
                 </a>
             </li>
-            @endif
+            @endif --}}
 
 
             <!-- Kelola Mata Pelajaran (Admin) -->
@@ -106,12 +106,17 @@
             @endif
 
             @if (auth()->user()->hasRole('Admin'))
-            <li class="nav-item">
-            <a href="{{ route('admin.teachers.index') }}"
-                class="nav-link {{ request()->routeIs('admin.teachers.*') ? 'active' : '' }}">
-                <i class="nav-icon fas fa-chalkboard-teacher"></i>
-                <p>Guru</p>
-            </a>
+            <li>
+                <a href="{{ route('admin.teachers.index') }}" @click="handleNavigation"
+                    class="w-full flex items-center rounded-lg hover:bg-white/10 transition-all duration-300 ease-in-out h-14">
+                    <div class="w-14 h-14 flex items-center justify-center flex-shrink-0">
+                        <span class="iconify text-2xl" data-icon="mdi:google-classroom"></span>
+                    </div>
+                    <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
+                        :class="$store.sidebar.isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
+                        <span>Kelola Guru</span>
+                    </div>
+                </a>
             </li>
              @endif
 

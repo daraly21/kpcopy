@@ -2,7 +2,7 @@
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800 flex items-center">
             <span class="iconify text-indigo-600 text-2xl mr-2" data-icon="mdi:account-tie"></span>
-            Manajemen Guru
+            Kelola Guru
         </h2>
     </x-slot>
 
@@ -22,46 +22,18 @@
                 @endcan
             </div>
 
-            {{-- Filter Section --}}
+            {{-- Filter Section (hanya Status Kerja) --}}
             <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
                 <div class="p-4">
-                    <form method="GET" action="{{ route('admin.teachers.index') }}" class="flex flex-wrap gap-4 items-end">
-                        <div class="flex-1 min-w-64">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Cari Nama Guru</label>
-                            <input type="text" name="search" value="{{ request('search') }}" 
-                                   placeholder="Masukkan nama guru..."
-                                   class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
-                        
-                        <div class="min-w-32">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status Kerja</label>
-                            <select name="status_kerja" class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="all" {{ request('status_kerja') == 'all' ? 'selected' : '' }}>Semua Status</option>
-                                <option value="PPPK" {{ request('status_kerja') == 'PPPK' ? 'selected' : '' }}>PPPK</option>
-                                <option value="Honorer" {{ request('status_kerja') == 'Honorer' ? 'selected' : '' }}>Honorer</option>
-                            </select>
-                        </div>
-                        
-                        <div class="min-w-32">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Kelamin</label>
-                            <select name="jenis_kelamin" class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="all" {{ request('jenis_kelamin') == 'all' ? 'selected' : '' }}>Semua</option>
-                                <option value="L" {{ request('jenis_kelamin') == 'L' ? 'selected' : '' }}>Laki-laki</option>
-                                <option value="P" {{ request('jenis_kelamin') == 'P' ? 'selected' : '' }}>Perempuan</option>
-                            </select>
-                        </div>
-                        
-                        <div class="flex gap-2">
-                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center">
-                                <span class="iconify mr-2" data-icon="mdi:magnify"></span>
-                                Filter
-                            </button>
-                            <a href="{{ route('admin.teachers.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md flex items-center">
-                                <span class="iconify mr-2" data-icon="mdi:refresh"></span>
-                                Reset
-                            </a>
-                        </div>
-                    </form>
+                    <div class="flex items-center gap-4">
+                        <label class="text-sm font-medium text-gray-700">Filter Status Kerja:</label>
+                        <select name="status_kerja" id="statusFilter" onchange="filterByStatus(this.value)"
+                                class="border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="all" {{ request('status_kerja') == 'all' || !request('status_kerja') ? 'selected' : '' }}>Semua Status</option>
+                            <option value="PPPK" {{ request('status_kerja') == 'PPPK' ? 'selected' : '' }}>PPPK</option>
+                            <option value="Honorer" {{ request('status_kerja') == 'Honorer' ? 'selected' : '' }}>Honorer</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -75,7 +47,7 @@
             @endif
 
             {{-- Statistics Cards --}}
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div class="flex items-center">
                         <span class="iconify text-blue-600 text-2xl mr-3" data-icon="mdi:account-group"></span>
@@ -105,18 +77,6 @@
                             <p class="text-yellow-600 text-sm font-medium">Honorer</p>
                             <p class="text-yellow-800 text-xl font-bold">
                                 {{ App\Models\Teacher::where('status_kerja', 'Honorer')->count() }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                    <div class="flex items-center">
-                        <span class="iconify text-purple-600 text-2xl mr-3" data-icon="mdi:home-account"></span>
-                        <div>
-                            <p class="text-purple-600 text-sm font-medium">Wali Kelas</p>
-                            <p class="text-purple-800 text-xl font-bold">
-                                {{ App\Models\Teacher::whereNotNull('class_id')->count() }}
                             </p>
                         </div>
                     </div>
@@ -188,7 +148,6 @@
                                                 tempat_lahir: '{{ addslashes($t->tempat_lahir) }}',
                                                 tanggal_lahir: '{{ $t->tanggal_lahir }}',
                                                 contact_email: '{{ addslashes($t->contact_email) }}',
-                                                status_kerja: '{{ $t->status_kerja }}',
                                                 class_id: '{{ $t->class_id }}',
                                                 subject_id: '{{ $t->subject_id }}'
                                             })"
@@ -287,6 +246,23 @@
                                 </div>
 
                                 <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Kelamin <span class="text-red-500">*</span></label>
+                                    <select name="jenis_kelamin" x-model="form.jenis_kelamin"
+                                        class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
+                                        <option value="">- Pilih Gender -</option>
+                                        <option value="L">Laki-laki</option>
+                                        <option value="P">Perempuan</option>
+                                    </select>
+                                    <div x-show="errors.jenis_kelamin" class="text-red-500 text-xs mt-1" x-text="errors.jenis_kelamin"></div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tempat Lahir</label>
+                                    <input type="text" name="tempat_lahir" x-model="form.tempat_lahir"
+                                        class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+
+                                <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Lahir</label>
                                     <input type="date" name="tanggal_lahir" x-model="form.tanggal_lahir"
                                         class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
@@ -304,10 +280,23 @@
                         <div x-show="currentStep === 2" class="space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Link User (Opsional)</label>
+                                    <select name="user_id" x-model="form.user_id"
+                                            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">- Pilih User -</option>
+                                        @foreach($availableUsers as $user)
+                                            <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="text-xs text-gray-500 mt-1">Hubungkan dengan akun user yang sudah ada</div>
+                                </div>
+
+                                <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">NIP</label>
                                     <input type="text" name="nip" x-model="form.nip"
                                         class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                         placeholder="Masukkan NIP">
+                                    <div class="text-xs text-gray-500 mt-1">Otomatis PPPK jika diisi</div>
                                 </div>
 
                                 <div>
@@ -315,25 +304,20 @@
                                     <input type="text" name="nuptk" x-model="form.nuptk"
                                         class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                         placeholder="Masukkan NUPTK">
+                                    <div class="text-xs text-gray-500 mt-1">Otomatis PPPK jika diisi</div>
                                 </div>
+                            </div>
 
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Status Kerja <span class="text-red-500">*</span></label>
-                                    <select name="status_kerja" x-model="form.status_kerja"
-                                        class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" required>
-                                        <option value="">- Pilih Status -</option>
-                                        <option value="PPPK">PPPK</option>
-                                        <option value="Honorer">Honorer</option>
-                                    </select>
-                                    <div x-show="errors.status_kerja" class="text-red-500 text-xs mt-1" x-text="errors.status_kerja"></div>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">User ID (Opsional)</label>
-                                    <input type="number" name="user_id" x-model="form.user_id"
-                                        class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                        placeholder="ID akun user">
-                                    <div class="text-xs text-gray-500 mt-1">Isi jika guru sudah punya akun users</div>
+                            <div class="bg-amber-50 border border-amber-200 rounded-md p-4">
+                                <div class="flex items-start">
+                                    <span class="iconify text-amber-600 text-xl mr-2 flex-shrink-0 mt-0.5" data-icon="mdi:information"></span>
+                                    <div class="text-amber-800 text-sm">
+                                        <p class="font-medium mb-1">Status Kerja Otomatis:</p>
+                                        <ul class="list-disc list-inside space-y-1 text-xs">
+                                            <li>Jika <strong>NIP</strong> atau <strong>NUPTK</strong> diisi → Status: <strong>PPPK</strong></li>
+                                            <li>Jika keduanya kosong → Status: <strong>Honorer</strong></li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -427,6 +411,17 @@
     </div>
 
     <script>
+    // Filter function untuk auto-filter status kerja
+    function filterByStatus(status) {
+        const url = new URL(window.location);
+        if (status === 'all') {
+            url.searchParams.delete('status_kerja');
+        } else {
+            url.searchParams.set('status_kerja', status);
+        }
+        window.location.href = url.toString();
+    }
+
     function teacherManager() {
         return {
             openModal: false,
@@ -443,14 +438,12 @@
                 tempat_lahir: '',
                 tanggal_lahir: '',
                 contact_email: '',
-                status_kerja: '',
                 class_id: '',
                 subject_id: '',
             },
             errors: {
                 nama_lengkap: '',
                 jenis_kelamin: '',
-                status_kerja: '',
             },
 
             openAddModal() {
@@ -460,16 +453,16 @@
                 this.form = {
                     id: '', user_id: '', nip: '', nuptk: '', nama_lengkap: '',
                     jenis_kelamin: '', tempat_lahir: '', tanggal_lahir: '',
-                    contact_email: '', status_kerja: '', class_id: '', subject_id: ''
+                    contact_email: '', class_id: '', subject_id: ''
                 };
-                this.errors = { nama_lengkap: '', jenis_kelamin: '', status_kerja: '' };
+                this.errors = { nama_lengkap: '', jenis_kelamin: '' };
                 this.openModal = true;
             },
 
             openEditModal(row) {
                 this.isEdit = true;
                 this.currentStep = 1;
-                this.formAction = '/admin/teachers/' + row.id;
+                this.formAction = '{{ url('admin/teachers') }}' + '/' + row.id;
                 this.form = {
                     id: row.id ?? '',
                     user_id: row.user_id ?? '',
@@ -480,17 +473,16 @@
                     tempat_lahir: row.tempat_lahir ?? '',
                     tanggal_lahir: row.tanggal_lahir ?? '',
                     contact_email: row.contact_email ?? '',
-                    status_kerja: row.status_kerja ?? '',
                     class_id: row.class_id ?? '',
                     subject_id: row.subject_id ?? '',
                 };
-                this.errors = { nama_lengkap: '', jenis_kelamin: '', status_kerja: '' };
+                this.errors = { nama_lengkap: '', jenis_kelamin: '' };
                 this.openModal = true;
             },
 
             validateAndSubmit(e) {
                 let ok = true;
-                this.errors = { nama_lengkap: '', jenis_kelamin: '', status_kerja: '' };
+                this.errors = { nama_lengkap: '', jenis_kelamin: '' };
 
                 if (!this.form.nama_lengkap || this.form.nama_lengkap.trim() === '') {
                     this.errors.nama_lengkap = 'Nama guru wajib diisi';
@@ -500,18 +492,12 @@
                     this.errors.jenis_kelamin = 'Jenis kelamin wajib dipilih';
                     ok = false;
                 }
-                if (!this.form.status_kerja) {
-                    this.errors.status_kerja = 'Status kerja wajib dipilih';
-                    ok = false;
-                }
 
                 if (!ok) {
                     e.preventDefault();
                     // Pindah ke step yang ada error
                     if (this.errors.nama_lengkap || this.errors.jenis_kelamin) {
                         this.currentStep = 1;
-                    } else if (this.errors.status_kerja) {
-                        this.currentStep = 2;
                     }
                 }
             }

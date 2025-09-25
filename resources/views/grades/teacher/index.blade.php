@@ -104,7 +104,7 @@
                             </button>
                         </div>
                         
-                        <button onclick="openAddModal()" 
+                        <button onclick="redirectToCreatePage()" 
                             class="inline-flex items-center px-4 py-2 border border-green-700 text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200">
                             <span class="iconify mr-2 text-lg" data-icon="mdi:plus"></span>
                             Tambah Nilai
@@ -236,7 +236,7 @@
                                 </p>
                             </div>
                             <div class="mt-4">
-                                <button onclick="openAddModal()" 
+                                <button onclick="redirectToCreatePage()" 
                                     class="inline-flex items-center px-4 py-2 border border-green-700 text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200">
                                     <span class="iconify mr-2 text-lg" data-icon="mdi:plus"></span>
                                     Tambah Nilai
@@ -259,100 +259,29 @@
         </div>
     </div>
 
-    <!-- Modal Tambah Nilai -->
-    <div id="addModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 w-full max-w-lg mx-4">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-medium text-gray-700">Tambah Nilai Siswa</h3>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <span class="iconify text-xl" data-icon="mdi:close"></span>
-                </button>
-            </div>
-            
-            <form id="addForm" class="space-y-4">
-                <div>
-                    <label for="student_id" class="block text-sm font-medium text-gray-700">Pilih Siswa *</label>
-                    <select name="student_id" id="student_id"
-                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                        required>
-                        <option value="">Pilih Siswa</option>
-                        @foreach($students as $student)
-                            <option value="{{ $student->id }}">{{ $student->name }} - {{ $student->class->name ?? 'N/A' }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div>
-                    <label for="task_name" class="block text-sm font-medium text-gray-700">Jenis Tugas *</label>
-                    <input type="text" name="task_name" id="task_name" 
-                        placeholder="Contoh: Quiz 1, UTS, Project"
-                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                        required>
-                </div>
-
-                <div>
-                    <label for="score" class="block text-sm font-medium text-gray-700">Nilai (0-100) *</label>
-                    <input type="number" name="score" id="score" 
-                        placeholder="0-100" min="0" max="100"
-                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md text-center"
-                        required>
-                </div>
-
-                <div>
-                    <label for="type" class="block text-sm font-medium text-gray-700">Tipe Tugas *</label>
-                    <select name="type" id="type"
-                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                        required>
-                        <option value="">Pilih Tipe Tugas</option>
-                        <option value="written">Tertulis</option>
-                        <option value="observation">Pengamatan</option>
-                        <option value="sumatif">Sumatif</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="semester" class="block text-sm font-medium text-gray-700">Semester *</label>
-                    <select name="semester" id="semester"
-                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                        required>
-                        <option value="">Pilih Semester</option>
-                        <option value="odd">Gasal</option>
-                        <option value="even">Genap</option>
-                    </select>
-                </div>
-
-                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="subject_id" value="{{ $subject->id ?? 9 }}">
-                
-                <div id="errorMessage" class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded hidden">
-                    <div class="flex">
-                        <span class="iconify mr-2" data-icon="mdi:alert-circle-outline"></span>
-                        <span id="errorText"></span>
-                    </div>
-                </div>
-
-                <div class="flex justify-end gap-2 pt-4">
-                    <button type="button" onclick="closeModal()"
-                        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200">
-                        <span class="iconify mr-2" data-icon="mdi:close"></span>
-                        Batal
-                    </button>
-                    <button type="submit" id="submitModalBtn"
-                        class="inline-flex items-center px-4 py-2 border border-blue-700 text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-                        <span class="iconify mr-2 text-lg" data-icon="mdi:content-save"></span>
-                        Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize filter functionality
             initializeFilters();
             updateRecordCount();
         });
+
+        function redirectToCreatePage() {
+            // Get current URL parameters to maintain class context
+            const urlParams = new URLSearchParams(window.location.search);
+            const classId = urlParams.get('class_id');
+            const className = urlParams.get('class_name');
+            
+            // Build the create page URL
+            let createUrl = `{{ route('teacher.grades.create', ['subjectId' => $subject->id]) }}`;
+            
+            // Add query parameters if they exist
+            if (classId && className) {
+                createUrl += `?class_id=${classId}&class_name=${encodeURIComponent(className)}`;
+            }
+            
+            window.location.href = createUrl;
+        }
 
         function initializeFilters() {
             const classFilter = document.getElementById('class_filter');
@@ -771,113 +700,6 @@
             });
         }
 
-        function openAddModal() {
-            const modal = document.getElementById('addModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            document.getElementById('errorMessage').classList.add('hidden');
-            
-            setTimeout(() => {
-                document.getElementById('student_id').focus();
-            }, 100);
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('addModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            document.getElementById('errorMessage').classList.add('hidden');
-            document.getElementById('addForm').reset();
-        }
-
-        // Close modal when clicking outside
-        document.getElementById('addModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
-            }
-        });
-
-        // Validate score input
-        document.getElementById('score').addEventListener('input', function() {
-            let value = parseInt(this.value);
-            if (isNaN(value)) {
-                this.value = '';
-            } else if (value < 0) {
-                this.value = 0;
-            } else if (value > 100) {
-                this.value = 100;
-            }
-        });
-
-        document.getElementById('addForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const errorMessage = document.getElementById('errorMessage');
-            const errorText = document.getElementById('errorText');
-            const submitBtn = document.getElementById('submitModalBtn');
-            
-            console.log('Form Data:', Object.fromEntries(formData));
-            
-            // Show loading state
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `
-                <span class="iconify w-3 h-3 mr-1 animate-spin" data-icon="mdi:loading"></span>
-                Menyimpan...
-            `;
-            
-            fetch('/teacher/grades', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errorData => {
-                        throw { status: response.status, errors: errorData.errors || { message: errorData.message } };
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    showAlert('success', data.message || 'Nilai berhasil disimpan!');
-                    closeModal();
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1000);
-                } else {
-                    errorText.textContent = data.message || 'Gagal menyimpan nilai.';
-                    errorMessage.classList.remove('hidden');
-                }
-            })
-            .catch(error => {
-                console.error('Fetch error:', error);
-                let errorMsg = '';
-                
-                if (error.status === 422) {
-                    errorMsg = 'Validasi gagal: ';
-                    for (let field in error.errors) {
-                        errorMsg += error.errors[field][0] + ' ';
-                    }
-                } else {
-                    errorMsg = `Error: ${error.status} - ${error.errors?.message || 'Terjadi kesalahan. Cek console untuk detail.'}`;
-                }
-                
-                errorText.textContent = errorMsg;
-                errorMessage.classList.remove('hidden');
-            })
-            .finally(() => {
-                // Reset button state
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = `
-                    <span class="iconify mr-2 text-lg" data-icon="mdi:content-save"></span>
-                    Simpan
-                `;
-            });
-        });
-
         function showAlert(type, message) {
             const alertContainer = document.getElementById('alertContainer');
             const existingAlert = alertContainer.querySelector('.alert-message');
@@ -943,11 +765,6 @@
         .cancel-btn:hover,
         .delete-btn:hover {
             transform: scale(1.1);
-        }
-
-        /* Modal backdrop blur effect */
-        #addModal {
-            backdrop-filter: blur(4px);
         }
 
         /* Filter transition effects */

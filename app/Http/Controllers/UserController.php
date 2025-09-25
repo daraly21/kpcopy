@@ -3,145 +3,117 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\ClassModel;
+use App\Models\ClassModel;           // gunakan ClassModel
+use App\Models\Subject;             // untuk dropdown mapel (Guru Mapel)
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Role;
-use Uploadcare\Api;
 
 class UserController extends Controller
 {
     /**
-     * Display a listing of the users with CRUD capabilities.
-     *
-     * @return \Illuminate\Http\Response
+     * List pengguna + data pendukung untuk modal CRUD di index.
      */
     public function index()
     {
-        $users = User::with(['roles', 'class'])->get();
-        $roles = Role::all();
-        $classes = ClassModel::all();
-        
-        return view('users.index', compact('users', 'roles', 'classes'));
+        // Ambil users beserta role, class, subject
+        $users = User::with(['roles', 'class', 'subject'])->latest()->get();
+
+        // Dropdown role, kelas, mapel
+        $roles    = Role::orderBy('id')->get();
+        $classes  = ClassModel::orderBy('name')->get();
+        $subjects = Subject::orderBy('name')->get();
+
+        return view('users.index', compact('users', 'roles', 'classes', 'subjects'));
     }
-    
-    public function create()
-    {
-        $roles = Role::all();
-        $classes = ClassModel::all();
-    
-        return view('users.create', compact('roles', 'classes'));
-    }
-    
+
     /**
-     * Display the specified user.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\Response
+     * Simpan user baru.
+     * - Role 2 (Wali Kelas) butuh class_id
+     * - Role 3 (Guru Mapel)  butuh subject_id
      */
-    public function show(User $user)
+    public function store(Request $request)
     {
-        return response()->json([
-            'user' => $user->load(['roles', 'class']),
+        $request->validate([
+            'name'               => 'required|string|max:255',
+            'email'              => 'required|string|email|max:255|unique:users,email',
+            'password'           => 'required|string|min:8|confirmed',
+            'role'               => 'required|exists:roles,id',
+            'class_id'           => 'nullable|exists:classes,id',
+            'subject_id'         => 'nullable|exists:subjects,id',
+            'profile_picture'    => 'nullable|string', // simpan URL (mis. ucarecdn)
         ]);
+
+        // Tentukan field tergantung role
+        $roleId   = (int) $request->role;
+        $classId  = $roleId === 2 ? $request->class_id   : null; // Wali Kelas
+        $subjectId= $roleId === 3 ? $request->subject_id : null; // Guru Mapel
+
+        $user = User::create([
+            'name'            => $request->name,
+            'email'           => $request->email,
+            'password'        => Hash::make($request->password),
+            'role_id'         => $roleId,         // jika kamu memakai kolom role_id di tabel users
+            'class_id'        => $classId,
+            'subject_id'      => $subjectId,
+            'profile_picture' => $request->profile_picture,
+        ]);
+
+        // Sinkronkan role Spatie (jika kamu pakai spatie/permission)
+        if ($role = Role::find($roleId)) {
+            $user->syncRoles([$role->name]);
+        }
+
+        return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan.');
     }
-
-// In your store method, replace the profile picture handling with:
-public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-        'email' => 'required|string|email|max:255|unique:users',
-        'password' => 'required|string|min:8|confirmed',
-        'role' => 'required|exists:roles,id',
-        'class_id' => 'nullable|exists:classes,id',
-        'profile_picture' => 'nullable|string', // Change to string to accept ucarecdn URL/ID
-    ]);
-
-    // Handle ucarecdn profile picture
-    $profilePictureUrl = null;
-    if ($request->filled('profile_picture')) {
-        $profilePictureUrl = $request->profile_picture; // Store the ucarecdn URL directly
-    }
-
-    // Rest of your code remains the same
-    $user = User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-        'role_id' => $request->role,
-        'class_id' => $request->role == 2 ? $request->class_id : null,
-        'profile_picture' => $profilePictureUrl,
-    ]);
-
-    // Assign role using Spatie
-    $role = Role::findById($request->role);
-    $user->assignRole($role);
-
-    return redirect()->route('admin.users.index')
-        ->with('success', 'User berhasil ditambahkan.');
-}
-
-public function edit(User $user)
-{
-    $roles = Role::all();
-    $classes = ClassModel::all();
-
-    return view('users.edit', compact('user', 'roles', 'classes'));
-}
-
-// Similarly update the update method:
-public function update(Request $request, User $user)
-{
-    $request->validate([
-        'name' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-        'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-        'password' => 'nullable|string|min:8|confirmed',
-        'role' => 'required|exists:roles,id',
-        'class_id' => 'nullable|exists:classes,id',
-        'profile_picture' => 'nullable|string', // Change to string for ucarecdn URL/ID
-    ]);
-
-    // Handle ucarecdn profile picture
-    if ($request->filled('profile_picture') && $request->profile_picture != $user->profile_picture) {
-        // No need to delete the old file as it's managed by ucarecdn
-        $user->profile_picture = $request->profile_picture;
-    }
-
-    // Rest of your update code
-    $user->name = $request->name;
-    $user->email = $request->email;
-    
-    if ($request->filled('password')) {
-        $user->password = Hash::make($request->password);
-    }
-    
-    $user->role_id = $request->role;
-    $user->class_id = $request->role == 2 ? $request->class_id : null;
-    
-    $user->save();
-
-    // Update role using Spatie
-    $user->syncRoles([]);
-    $role = Role::findById($request->role);
-    $user->assignRole($role);
-
-    return redirect()->route('admin.users.index')
-        ->with('success', 'Data user berhasil diperbarui.');
-}
 
     /**
-     * Remove the specified user from storage.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\Response
+     * Update user.
+     */
+    public function update(Request $request, User $user)
+    {
+        $request->validate([
+            'name'               => 'required|string|max:255',
+            'email'              => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password'           => 'nullable|string|min:8|confirmed',
+            'role'               => 'required|exists:roles,id',
+            'class_id'           => 'nullable|exists:classes,id',
+            'subject_id'         => 'nullable|exists:subjects,id',
+            'profile_picture'    => 'nullable|string',
+        ]);
+
+        $roleId    = (int) $request->role;
+        $classId   = $roleId === 2 ? $request->class_id   : null; // Wali Kelas
+        $subjectId = $roleId === 3 ? $request->subject_id : null; // Guru Mapel
+
+        $user->name            = $request->name;
+        $user->email           = $request->email;
+        $user->role_id         = $roleId;
+        $user->class_id        = $classId;
+        $user->subject_id      = $subjectId;
+        if ($request->filled('profile_picture')) {
+            $user->profile_picture = $request->profile_picture;
+        }
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+        $user->save();
+
+        // Sinkronkan role Spatie (jika digunakan)
+        if ($role = Role::find($roleId)) {
+            $user->syncRoles([$role->name]);
+        }
+
+        return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus user.
      */
     public function destroy(User $user)
     {
         $user->delete();
-    
         return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
     }
-    
 }

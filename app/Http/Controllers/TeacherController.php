@@ -35,16 +35,6 @@ class TeacherController extends Controller
             $query->where('status_kerja', $request->status_kerja);
         }
 
-        // Filter berdasarkan jenis kelamin
-        if ($request->filled('jenis_kelamin') && $request->jenis_kelamin !== 'all') {
-            $query->where('jenis_kelamin', $request->jenis_kelamin);
-        }
-
-        // Filter berdasarkan pencarian nama
-        if ($request->filled('search')) {
-            $query->where('nama_lengkap', 'like', '%' . $request->search . '%');
-        }
-
         $teachers = $query->latest('id')->paginate(15);
 
         // data untuk modal (dropdown)
@@ -55,20 +45,10 @@ class TeacherController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('teachers.index', compact('teachers', 'classes', 'allowedSubjects'));
-    }
-
-    public function create()
-    {
-        $allowedSubjects = Subject::query()
-            ->where('name', 'like', '%Agama%')
-            ->orWhere('name', 'like', '%PJOK%')
-            ->orderBy('name')
-            ->get();
-
-        $classes = ClassModel::orderBy('name')->get();
-
-        return view('teachers.create', compact('allowedSubjects', 'classes'));
+        // Ambil users yang belum punya teacher untuk dropdown
+        $availableUsers = User::whereDoesntHave('teacher')->orderBy('name')->get(); // untuk Tambah
+        $allUsers = User::orderBy('name')->get(); // untuk Edit
+        return view('teachers.index', compact('teachers','classes','allowedSubjects','availableUsers','allUsers'));
     }
 
     public function store(Request $request)
@@ -76,7 +56,7 @@ class TeacherController extends Controller
         $allowedSubjectIds = $this->allowedSubjectIds();
 
         $data = $request->validate([
-            'user_id'       => ['nullable', 'exists:users,id'],
+            'user_id' => ['nullable','exists:users,id', Rule::unique('teachers','user_id')],
             'nip'           => ['nullable', 'max:50', 'unique:teachers,nip'],
             'nuptk'         => ['nullable', 'max:50', 'unique:teachers,nuptk'],
             'nama_lengkap'  => ['required', 'string', 'max:255'],
@@ -84,7 +64,6 @@ class TeacherController extends Controller
             'tempat_lahir'  => ['nullable', 'string', 'max:100'],
             'tanggal_lahir' => ['nullable', 'date', 'before:today'],
             'contact_email' => ['nullable', 'email'],
-            'status_kerja'  => ['required', 'in:PPPK,Honorer'],
 
             // wali kelas (opsional) → jaga 1 wali/kelas
             'class_id'      => [
@@ -102,22 +81,18 @@ class TeacherController extends Controller
             ],
         ]);
 
+        // Logic untuk status kerja berdasarkan NIP/NUPTK
+        if (!empty($data['nip'])) {
+            $data['status_kerja'] = 'PPPK';
+        } elseif (!empty($data['nuptk'])) {
+            $data['status_kerja'] = 'PPPK';
+        } else {
+            $data['status_kerja'] = 'Honorer';
+        }
+
         Teacher::create($data);
 
-        return redirect()->route('teachers.index')->with('success', 'Guru berhasil dibuat.');
-    }
-
-    public function edit(Teacher $teacher)
-    {
-        $allowedSubjects = Subject::query()
-            ->where('name', 'like', '%Agama%')
-            ->orWhere('name', 'like', '%PJOK%')
-            ->orderBy('name')
-            ->get();
-
-        $classes = ClassModel::orderBy('name')->get();
-
-        return view('teachers.edit', compact('teacher', 'allowedSubjects', 'classes'));
+        return redirect()->route('admin.teachers.index')->with('success', 'Guru berhasil ditambahkan.');
     }
 
     public function update(Request $request, Teacher $teacher)
@@ -125,7 +100,7 @@ class TeacherController extends Controller
         $allowedSubjectIds = $this->allowedSubjectIds();
 
         $data = $request->validate([
-            'user_id'       => ['nullable', 'exists:users,id'],
+            'user_id' => ['nullable','exists:users,id', Rule::unique('teachers','user_id')->ignore($teacher->id)],
             'nip'           => ['nullable', 'max:50', Rule::unique('teachers', 'nip')->ignore($teacher->id)],
             'nuptk'         => ['nullable', 'max:50', Rule::unique('teachers', 'nuptk')->ignore($teacher->id)],
             'nama_lengkap'  => ['required', 'string', 'max:255'],
@@ -133,7 +108,6 @@ class TeacherController extends Controller
             'tempat_lahir'  => ['nullable', 'string', 'max:100'],
             'tanggal_lahir' => ['nullable', 'date', 'before:today'],
             'contact_email' => ['nullable', 'email'],
-            'status_kerja'  => ['required', 'in:PPPK,Honorer'],
 
             // wali kelas: unik per kelas (kecuali milik dirinya sendiri)
             'class_id'      => [
@@ -151,15 +125,24 @@ class TeacherController extends Controller
             ],
         ]);
 
+        // Logic untuk status kerja berdasarkan NIP/NUPTK
+        if (!empty($data['nip'])) {
+            $data['status_kerja'] = 'PPPK';
+        } elseif (!empty($data['nuptk'])) {
+            $data['status_kerja'] = 'PPPK';
+        } else {
+            $data['status_kerja'] = 'Honorer';
+        }
+
         $teacher->update($data);
 
-        return redirect()->route('teachers.index')->with('success', 'Guru berhasil diperbarui.');
+        return redirect()->route('admin.teachers.index')->with('success', 'Guru berhasil diperbarui.');
     }
 
     public function destroy(Teacher $teacher)
     {
         $teacher->delete();
-        return redirect()->route('teachers.index')->with('success', 'Guru dihapus.');
+        return redirect()->route('admin.teachers.index')->with('success', 'Guru berhasil dihapus.');
     }
 
 /**
@@ -205,12 +188,15 @@ private function autoSyncFromUsers(): void
             $classId = null;
         }
 
+        // Tentukan status kerja default
+        $statusKerja = 'Honorer'; // default
+
         // Buat entri teacher, class_id boleh null (guru mapel tanpa wali OK)
         Teacher::create([
             'user_id'       => $u->id,
             'nama_lengkap'  => $u->name,
             'contact_email' => $u->email,
-            'status_kerja'  => 'Honorer', // default; sesuaikan jika perlu
+            'status_kerja'  => $statusKerja,
             'class_id'      => $classId,
             'subject_id'    => $subjectId,
             // kolom lain dibiarkan null (nip/nuptk/dsb)

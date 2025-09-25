@@ -86,8 +86,8 @@
                 </div>
 
                 <!-- Ingat Saya -->
-                <div class="flex justify-between mb-8">
-                    <div class="flex items-center">
+                <div class="flex justify-end mb-8">
+                    {{-- <div class="flex items-center">
                         <input 
                             id="remember_me" 
                             type="checkbox" 
@@ -97,7 +97,7 @@
                         <label for="remember_me" class="text-sm text-blue-100">
                             Ingat saya
                         </label>
-                    </div>
+                    </div> --}}
 
                     @if (Route::has('password.request'))
                         <a 
