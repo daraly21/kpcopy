@@ -29,7 +29,7 @@
                         <label class="text-sm font-medium text-gray-700">Filter Status Kerja:</label>
                         <select name="status_kerja" id="statusFilter" onchange="filterByStatus(this.value)"
                                 class="border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="all" {{ request('status_kerja') == 'all' || !request('status_kerja') ? 'selected' : '' }}>Semua Status</option>
+                            <option value="all" {{ request('status_kerja') == 'all' || !request('status_kerja') ? 'selected' : '' }}></option>
                             <option value="PPPK" {{ request('status_kerja') == 'PPPK' ? 'selected' : '' }}>PPPK</option>
                             <option value="Honorer" {{ request('status_kerja') == 'Honorer' ? 'selected' : '' }}>Honorer</option>
                         </select>
@@ -45,43 +45,6 @@
                     </div>
                 </div>
             @endif
-
-            {{-- Statistics Cards --}}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div class="flex items-center">
-                        <span class="iconify text-blue-600 text-2xl mr-3" data-icon="mdi:account-group"></span>
-                        <div>
-                            <p class="text-blue-600 text-sm font-medium">Total Guru</p>
-                            <p class="text-blue-800 text-xl font-bold">{{ $teachers->total() }}</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div class="flex items-center">
-                        <span class="iconify text-green-600 text-2xl mr-3" data-icon="mdi:badge-account"></span>
-                        <div>
-                            <p class="text-green-600 text-sm font-medium">PPPK</p>
-                            <p class="text-green-800 text-xl font-bold">
-                                {{ App\Models\Teacher::where('status_kerja', 'PPPK')->count() }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <div class="flex items-center">
-                        <span class="iconify text-yellow-600 text-2xl mr-3" data-icon="mdi:account-clock"></span>
-                        <div>
-                            <p class="text-yellow-600 text-sm font-medium">Honorer</p>
-                            <p class="text-yellow-800 text-xl font-bold">
-                                {{ App\Models\Teacher::where('status_kerja', 'Honorer')->count() }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
                 <div class="overflow-x-auto">

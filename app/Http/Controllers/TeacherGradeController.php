@@ -32,17 +32,14 @@ class TeacherGradeController extends Controller
         }
 
         $subject = Subject::findOrFail($user->subject_id);
-        
         // Ambil semua kelas dengan statistik
         $classes = ClassModel::withCount('students')->get();
-        
         // Hitung statistik per kelas untuk mata pelajaran ini
         foreach ($classes as $class) {
             $totalTasks = GradeTask::where('subject_id', $user->subject_id)
                 ->whereHas('student', function ($query) use ($class) {
                     $query->where('class_id', $class->id);
                 })->count();
-            
             $class->total_tasks = $totalTasks;
             $class->completion_percentage = $class->students_count > 0 ? 
                 min(100, ($totalTasks / ($class->students_count * 5)) * 100) : 0; // Asumsi 5 tugas per siswa
@@ -359,201 +356,199 @@ class TeacherGradeController extends Controller
         }
     }
 
-    public function storeBatch(Request $request)
-{
-    $user = Auth::user();
-    
-    // Log untuk debugging
-    Log::info('StoreBatch called with data:', $request->all());
-    
-    if ($user->role_id != 3 || !$user->subject_id) {
-        Log::error('Unauthorized batch store attempt', ['user_id' => $user->id]);
-        return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
-    }
-
-    // Validasi input - sesuaikan dengan nama field dari form
-    $validated = $request->validate([
-        'class_id' => 'required|exists:classes,id',
-        'task_name' => 'required|string|max:255',
-        'assignment_type' => 'required|in:written,observation,sumatif', // ubah dari 'type' ke 'assignment_type'
-        'semester' => 'required|in:Odd,Even',
-        'scores' => 'required|array',
-        'scores.*' => 'nullable|numeric|min:0|max:100'
-    ], [
-        'class_id.required' => 'Kelas wajib dipilih.',
-        'class_id.exists' => 'Kelas tidak valid.',
-        'task_name.required' => 'Nama tugas wajib diisi.',
-        'assignment_type.required' => 'Tipe tugas wajib dipilih.',
-        'assignment_type.in' => 'Tipe tugas tidak valid.',
-        'semester.required' => 'Semester wajib dipilih.',
-        'semester.in' => 'Semester tidak valid.',
-        'scores.required' => 'Nilai wajib diisi untuk setidaknya satu siswa.',
-        'scores.array' => 'Format nilai tidak valid.',
-        'scores.*.numeric' => 'Nilai harus berupa angka.',
-        'scores.*.min' => 'Nilai minimal adalah 0.',
-        'scores.*.max' => 'Nilai maksimal adalah 100.',
-    ]);
-
-    Log::info('Validation passed for storeBatch', [
-        'class_id' => $validated['class_id'],
-        'task_name' => $validated['task_name'],
-        'assignment_type' => $validated['assignment_type'],
-        'semester' => $validated['semester'],
-        'scores_count' => count($validated['scores']),
-        'user_subject_id' => $user->subject_id
-    ]);
-
-    try {
-        DB::beginTransaction();
+        public function storeBatch(Request $request)
+    {
+        $user = Auth::user();
         
-        $savedCount = 0;
-        foreach ($validated['scores'] as $studentId => $score) {
-            if (is_null($score) || $score === '') continue;
+        // Log untuk debugging
+        Log::info('StoreBatch called with data:', $request->all());
+        
+        if ($user->role_id != 3 || !$user->subject_id) {
+            Log::error('Unauthorized batch store attempt', ['user_id' => $user->id]);
+            return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
+        }
+
+        // Validasi input - sesuaikan dengan nama field dari form
+        $validated = $request->validate([
+            'class_id' => 'required|exists:classes,id',
+            'task_name' => 'required|string|max:255',
+            'assignment_type' => 'required|in:written,observation,sumatif', // ubah dari 'type' ke 'assignment_type'
+            'semester' => 'required|in:Odd,Even',
+            'scores' => 'required|array',
+            'scores.*' => 'nullable|numeric|min:0|max:100'
+        ], [
+            'class_id.required' => 'Kelas wajib dipilih.',
+            'class_id.exists' => 'Kelas tidak valid.',
+            'task_name.required' => 'Nama tugas wajib diisi.',
+            'assignment_type.required' => 'Tipe tugas wajib dipilih.',
+            'assignment_type.in' => 'Tipe tugas tidak valid.',
+            'semester.required' => 'Semester wajib dipilih.',
+            'semester.in' => 'Semester tidak valid.',
+            'scores.required' => 'Nilai wajib diisi untuk setidaknya satu siswa.',
+            'scores.array' => 'Format nilai tidak valid.',
+            'scores.*.numeric' => 'Nilai harus berupa angka.',
+            'scores.*.min' => 'Nilai minimal adalah 0.',
+            'scores.*.max' => 'Nilai maksimal adalah 100.',
+        ]);
+
+        Log::info('Validation passed for storeBatch', [
+            'class_id' => $validated['class_id'],
+            'task_name' => $validated['task_name'],
+            'assignment_type' => $validated['assignment_type'],
+            'semester' => $validated['semester'],
+            'scores_count' => count($validated['scores']),
+            'user_subject_id' => $user->subject_id
+        ]);
+
+        try {
+            DB::beginTransaction();
             
-            // Verifikasi siswa ada di kelas
-            $student = Student::where('id', $studentId)->where('class_id', $validated['class_id'])->first();
-            if (!$student) {
-                Log::warning('Student not found in class', [
+            $savedCount = 0;
+            foreach ($validated['scores'] as $studentId => $score) {
+                if (is_null($score) || $score === '') continue;
+                
+                // Verifikasi siswa ada di kelas
+                $student = Student::where('id', $studentId)->where('class_id', $validated['class_id'])->first();
+                if (!$student) {
+                    Log::warning('Student not found in class', [
+                        'student_id' => $studentId,
+                        'class_id' => $validated['class_id']
+                    ]);
+                    continue;
+                }
+                
+                Log::info('Processing student score', [
                     'student_id' => $studentId,
-                    'class_id' => $validated['class_id']
+                    'student_name' => $student->name,
+                    'score' => $score,
+                    'subject_id' => $user->subject_id
                 ]);
-                continue;
-            }
-            
-            Log::info('Processing student score', [
-                'student_id' => $studentId,
-                'student_name' => $student->name,
-                'score' => $score,
-                'subject_id' => $user->subject_id
-            ]);
-            
-            // Cari atau buat Grade
-            $grade = Grade::firstOrCreate(
-                [
+                
+                // Cari atau buat Grade
+                $grade = Grade::firstOrCreate(
+                    [
+                        'student_id' => $studentId,
+                        'subject_id' => $user->subject_id, // gunakan subject_id dari user yang login
+                        'semester' => $validated['semester']
+                    ],
+                    [
+                        'score' => $score,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]
+                );
+
+                // Buat GradeTask
+                $gradeTask = GradeTask::create([
                     'student_id' => $studentId,
                     'subject_id' => $user->subject_id, // gunakan subject_id dari user yang login
-                    'semester' => $validated['semester']
-                ],
-                [
+                    'task_name' => $validated['task_name'],
                     'score' => $score,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]
-            );
+                    'type' => $validated['assignment_type'], // ubah ke assignment_type
+                    'grades_id' => $grade->id,
+                ]);
+                
+                Log::info('GradeTask created successfully', [
+                    'grade_task_id' => $gradeTask->id,
+                    'student_id' => $studentId,
+                    'subject_id' => $user->subject_id
+                ]);
+                
+                $savedCount++;
+            }
+            
+            DB::commit();
 
-            // Buat GradeTask
-            $gradeTask = GradeTask::create([
-                'student_id' => $studentId,
-                'subject_id' => $user->subject_id, // gunakan subject_id dari user yang login
-                'task_name' => $validated['task_name'],
-                'score' => $score,
-                'type' => $validated['assignment_type'], // ubah ke assignment_type
-                'grades_id' => $grade->id,
+            Log::info('Batch grades stored successfully', [
+                'saved_count' => $savedCount,
+                'subject_id' => $user->subject_id,
+                'class_id' => $validated['class_id']
+            ]);
+
+            if ($savedCount > 0) {
+                return redirect()->back()->with('success', "Berhasil menyimpan nilai untuk {$savedCount} siswa");
+            } else {
+                return redirect()->back()->with('warning', 'Tidak ada nilai yang tersimpan. Pastikan Anda mengisi setidaknya satu nilai.');
+            }
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to store batch grades', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'class_id' => $request->input('class_id'),
+                'user_subject_id' => $user->subject_id,
+                'request_data' => $request->all()
             ]);
             
-            Log::info('GradeTask created successfully', [
-                'grade_task_id' => $gradeTask->id,
-                'student_id' => $studentId,
+            return redirect()->back()->with('error', 'Gagal menyimpan nilai: ' . $e->getMessage())->withInput();
+        }
+    }
+
+
+    public function create(Request $request, int $subjectId)
+    {
+        $user = Auth::user();
+        
+        // Cek otorisasi guru
+        if ($user->role_id != 3 || !$user->subject_id) {
+            Log::error('Unauthorized access to create grades', [
+                'user_id' => $user->id,
+                'role_id' => $user->role_id,
                 'subject_id' => $user->subject_id
             ]);
-            
-            $savedCount++;
+            abort(403, 'Akses ditolak. Anda bukan guru mata pelajaran.');
         }
-        
-        DB::commit();
 
-        Log::info('Batch grades stored successfully', [
-            'saved_count' => $savedCount,
-            'subject_id' => $user->subject_id,
-            'class_id' => $validated['class_id']
-        ]);
-
-        if ($savedCount > 0) {
-            return redirect()->back()->with('success', "Berhasil menyimpan nilai untuk {$savedCount} siswa");
-        } else {
-            return redirect()->back()->with('warning', 'Tidak ada nilai yang tersimpan. Pastikan Anda mengisi setidaknya satu nilai.');
+        // Validasi bahwa subject_id sesuai dengan guru yang login
+        if ($subjectId != $user->subject_id) {
+            Log::error('Subject ID mismatch in create', [
+                'user_subject_id' => $user->subject_id,
+                'requested_subject_id' => $subjectId
+            ]);
+            abort(403, 'Anda tidak berhak mengelola nilai untuk mata pelajaran ini.');
         }
-        
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Failed to store batch grades', [
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-            'class_id' => $request->input('class_id'),
-            'user_subject_id' => $user->subject_id,
-            'request_data' => $request->all()
-        ]);
-        
-        return redirect()->back()->with('error', 'Gagal menyimpan nilai: ' . $e->getMessage())->withInput();
-    }
-}
 
-// =====================
-// ➕ CREATE (flow: select-class → index → create)
-// =====================
-public function create(Request $request, int $subjectId)
-{
-    $user = Auth::user();
-    
-    // Cek otorisasi guru
-    if ($user->role_id != 3 || !$user->subject_id) {
-        Log::error('Unauthorized access to create grades', [
+        // Ambil subject
+        $subject = Subject::findOrFail($subjectId);
+
+        // Ambil class_id dan class_name dari query parameter
+        $classId = $request->query('class_id');
+        $className = $request->query('class_name');
+
+        // Validasi class_id wajib ada
+        if (!$classId) {
+            return redirect()->route('teacher.grades.select-class')
+                ->with('error', 'Silakan pilih kelas terlebih dahulu.');
+        }
+
+        // Validasi kelas exists
+        $class = ClassModel::find($classId);
+        if (!$class) {
+            return redirect()->route('teacher.grades.select-class')
+                ->with('error', 'Kelas tidak ditemukan.');
+        }
+
+        // Ambil semua siswa pada kelas ini
+        $students = Student::where('class_id', $classId)
+            ->orderBy('name')
+            ->get(['id', 'name', 'nis']);
+
+        Log::info('Teacher accessing create grades page', [
             'user_id' => $user->id,
-            'role_id' => $user->role_id,
-            'subject_id' => $user->subject_id
+            'subject_id' => $subjectId,
+            'class_id' => $classId,
+            'class_name' => $className,
+            'students_count' => $students->count()
         ]);
-        abort(403, 'Akses ditolak. Anda bukan guru mata pelajaran.');
-    }
 
-    // Validasi bahwa subject_id sesuai dengan guru yang login
-    if ($subjectId != $user->subject_id) {
-        Log::error('Subject ID mismatch in create', [
-            'user_subject_id' => $user->subject_id,
-            'requested_subject_id' => $subjectId
+        return view('grades.teacher.create', [
+            'subject'   => $subject,
+            'classId'   => $classId,
+            'className' => $className,
+            'students'  => $students,
         ]);
-        abort(403, 'Anda tidak berhak mengelola nilai untuk mata pelajaran ini.');
     }
-
-    // Ambil subject
-    $subject = Subject::findOrFail($subjectId);
-
-    // Ambil class_id dan class_name dari query parameter
-    $classId = $request->query('class_id');
-    $className = $request->query('class_name');
-
-    // Validasi class_id wajib ada
-    if (!$classId) {
-        return redirect()->route('teacher.grades.select-class')
-            ->with('error', 'Silakan pilih kelas terlebih dahulu.');
-    }
-
-    // Validasi kelas exists
-    $class = ClassModel::find($classId);
-    if (!$class) {
-        return redirect()->route('teacher.grades.select-class')
-            ->with('error', 'Kelas tidak ditemukan.');
-    }
-
-    // Ambil semua siswa pada kelas ini
-    $students = Student::where('class_id', $classId)
-        ->orderBy('name')
-        ->get(['id', 'name', 'nis']);
-
-    Log::info('Teacher accessing create grades page', [
-        'user_id' => $user->id,
-        'subject_id' => $subjectId,
-        'class_id' => $classId,
-        'class_name' => $className,
-        'students_count' => $students->count()
-    ]);
-
-    return view('grades.teacher.create', [
-        'subject'   => $subject,
-        'classId'   => $classId,
-        'className' => $className,
-        'students'  => $students,
-    ]);
-}
 
     /**
      * Mengambil riwayat nilai siswa untuk modal detail

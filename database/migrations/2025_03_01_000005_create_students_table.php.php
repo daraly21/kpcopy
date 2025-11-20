@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('students', function (Blueprint $table) {
             $table->id(); // bigint unsigned auto_increment
             $table->string('name');
-            $table->string('nis');
+            $table->string('nis')->unique();
             $table->enum('gender', ['L', 'P']);
             $table->foreignId('class_id')->constrained()->onDelete('cascade');
             $table->string('parent_phone');

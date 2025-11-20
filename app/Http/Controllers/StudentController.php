@@ -44,7 +44,7 @@ class StudentController extends Controller
         $request->validate([
             'class_id' => 'required|exists:classes,id',
             'name' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-            'nis' => 'required|numeric|digits_between:1,10',
+           'nis' => 'required|numeric|digits_between:1,10|unique:students,nis',
             'gender' => 'required|in:L,P',
             'parent_name' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'birth_place' => 'required|string|max:255',
@@ -75,7 +75,7 @@ class StudentController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-            'nis' => 'required|numeric|digits_between:1,10',
+            'nis' => 'required|numeric|digits_between:1,10|unique:students,nis,' . $student->id,
             'gender' => 'required|in:L,P',
             'parent_name' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'birth_place' => 'required|string|max:255',

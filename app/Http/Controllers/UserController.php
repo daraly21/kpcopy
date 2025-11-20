@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\ClassModel;           // gunakan ClassModel
-use App\Models\Subject;             // untuk dropdown mapel (Guru Mapel)
+use App\Models\ClassModel;           
+use App\Models\Subject;             
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;

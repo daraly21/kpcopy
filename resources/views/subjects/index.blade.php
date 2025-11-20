@@ -2,7 +2,7 @@
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800 flex items-center">
             <span class="iconify text-indigo-600 text-2xl mr-2" data-icon="mdi:book-open-page-variant"></span>
-            Manajemen Mata Pelajaran
+            Kelola Mata Pelajaran
         </h2>
     </x-slot>
 

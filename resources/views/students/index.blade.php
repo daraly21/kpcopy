@@ -1,8 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">Pilih Kelas</h2>
+        <h2 class="text-xl font-semibold leading-tight text-gray-800">Kelola Siswa</h2>
     </x-slot>
 
+    <h3 class="text-lg font-medium text-gray-700 flex items-center">
+                    <span class="iconify text-indigo-600 text-xl mr-2" data-icon="student"></span>
+                    Pilih Daftar Siswa per Kelas
+                </h3>
     <div class="py-6 container mx-auto px-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             @foreach ($classes as $class)

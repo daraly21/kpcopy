@@ -3,7 +3,7 @@
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800 flex items-center">
             <span class="iconify text-indigo-600 text-2xl mr-2" data-icon="mdi:account-multiple"></span>
-            Manajemen Pengguna
+            Kelola Pengguna
         </h2>
     </x-slot>
 
@@ -196,14 +196,14 @@
                             </div>
 
                             <!-- Foto Profil (URL) -->
-                            <div class="md:col-span-2">
+                            {{-- <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Foto Profil (URL)</label>
                                 <input type="text" name="profile_picture" 
                                        class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-150"
                                        placeholder="https://ucarecdn.com/..."
                                        x-model="form.profile_picture">
                                 <div x-show="errors.profile_picture" class="text-red-500 text-xs mt-1" x-text="errors.profile_picture"></div>
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 mt-6">

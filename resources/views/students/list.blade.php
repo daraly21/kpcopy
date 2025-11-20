@@ -287,7 +287,7 @@ function studentManager() {
                 birth_date: '',
                 parent_phone: ''
             };
-            this.formAction = '{{ route('admin.siswa.update', ':id') }}'.replace(':id', student.id);
+           this.formAction = '{{ route('admin.siswa.update', ':id') }}'.replace(':id', student.id);
             this.openModal = true;
         },
         
