@@ -64,7 +64,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $index + 1 }}</td>
                                     <td class="px-6 py-4 text-sm font-medium text-gray-900 max-w-56 break-words">{{ $user->name }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-700">{{ $user->email }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-700">{{ $user->roles->first()->name ?? '-' }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-700">{{ $user->roles->first()->name == 'Admin' ? 'Dapodik' : $user->roles->first()->name ?? '-' }}</td>
                                     <td class="px-6 py-4 text-sm text-gray-700">{{ $user->class->name ?? '-' }}</td>
                                     <td class="px-2 py-4 whitespace-nowrap text-sm font-medium">
                                         <div class="flex justify-center space-x-2">
@@ -161,8 +161,10 @@
                                         x-model="form.role" required>
                                     <option value="">-- Pilih Role --</option>
                                     @foreach ($roles as $role)
-                                        <option value="{{ $role->id }}">{{ $role->name }}</option>
-                                    @endforeach
+                                    <option value="{{ $role->id }}">
+                                        {{ $role->name == 'Admin' ? 'Dapodik' : $role->name }}
+                                    </option>
+                                @endforeach
                                 </select>
                                 <div x-show="errors.role" class="text-red-500 text-xs mt-1" x-text="errors.role"></div>
                             </div>

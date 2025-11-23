@@ -8,14 +8,14 @@ use Illuminate\Http\Request;
 
 class StudentController extends Controller
 {
-    // 🔹 Halaman awal: grid kelas
+    //  Halaman awal: grid kelas
     public function pilihKelas()
     {
         $classes = ClassModel::all();
         return view('students.index', compact('classes'));
     }
 
-    // 🔹 Index: daftar siswa per kelas
+    //  Index: daftar siswa per kelas
     public function index($classId)
     {
         $class = ClassModel::findOrFail($classId);
@@ -24,7 +24,7 @@ class StudentController extends Controller
         return view('students.index', compact('class', 'students'));
     }
 
-    // 🔹 List: daftar siswa per kelas (untuk tampilan tabel)
+    //  List: daftar siswa per kelas (untuk tampilan tabel)
     public function list($classId)
     {
         $class = ClassModel::findOrFail($classId);
@@ -33,23 +33,29 @@ class StudentController extends Controller
         return view('students.list', compact('class', 'students'));
     }
 
-    // 🔹 Tampilkan form tambah siswa
+    //  Tampilkan form tambah siswa
     public function create(Request $request)
     {
     }
 
-    // 🔹 Simpan siswa
+    //  Simpan siswa
     public function store(Request $request)
     {
         $request->validate([
             'class_id' => 'required|exists:classes,id',
             'name' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-           'nis' => 'required|numeric|digits_between:1,10|unique:students,nis',
+            'nis' => 'required|numeric|digits_between:1,10|unique:students,nis',
             'gender' => 'required|in:L,P',
             'parent_name' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'birth_place' => 'required|string|max:255',
             'birth_date' => 'required|date',
             'parent_phone' => 'required|numeric|starts_with:62|digits_between:10,13',
+        ], [
+            'nis.unique' => 'NIS sudah terdaftar. Silakan gunakan NIS yang berbeda.',
+            'name.regex' => 'Nama hanya boleh berisi huruf dan spasi.',
+            'parent_name.regex' => 'Nama orang tua hanya boleh berisi huruf dan spasi.',
+            'parent_phone.starts_with' => 'Nomor HP harus diawali dengan 62.',
+            'parent_phone.digits_between' => 'Nomor HP harus antara 10-13 digit.',
         ]);
 
         Student::create($request->all());
@@ -58,19 +64,19 @@ class StudentController extends Controller
                          ->with('success', 'Siswa berhasil ditambahkan.');
     }
 
-    // 🔹 Show detail siswa
+    //  Show detail siswa
     public function show(Student $student)
     {
         return view('students.show', compact('student'));
     }
 
-    // 🔹 Tampilkan form edit
+    //  Tampilkan form edit
     public function edit(Student $student)
     {
 
     }
 
-    // 🔹 Simpan perubahan siswa
+    //  Simpan perubahan siswa
     public function update(Request $request, Student $student)
     {
         $request->validate([
@@ -81,6 +87,12 @@ class StudentController extends Controller
             'birth_place' => 'required|string|max:255',
             'birth_date' => 'required|date',
             'parent_phone' => 'required|numeric|starts_with:62|digits_between:10,13',
+        ], [
+            'nis.unique' => 'NIS sudah terdaftar. Silakan gunakan NIS yang berbeda.',
+            'name.regex' => 'Nama hanya boleh berisi huruf dan spasi.',
+            'parent_name.regex' => 'Nama orang tua hanya boleh berisi huruf dan spasi.',
+            'parent_phone.starts_with' => 'Nomor HP harus diawali dengan 62.',
+            'parent_phone.digits_between' => 'Nomor HP harus antara 10-13 digit.',
         ]);
 
         $student->update($request->all());
@@ -89,7 +101,7 @@ class StudentController extends Controller
                          ->with('success', 'Data siswa berhasil diperbarui.');
     }
 
-    // 🔹 Hapus siswa
+    //  Hapus siswa
     public function destroy(Student $student)
     {
         $classId = $student->class_id;
