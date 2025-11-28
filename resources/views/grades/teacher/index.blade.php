@@ -33,21 +33,7 @@
                 <!-- Filter Section -->
                 <div class="mb-8 p-4 bg-gray-50 rounded-lg">
                     <h3 class="text-lg font-medium mb-4 text-gray-700 border-b pb-2">Filter Data Nilai</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <!-- Class Filter -->
-                        <div>
-                            <label for="class_filter" class="block text-sm font-medium text-gray-700">Filter Kelas</label>
-                            <select id="class_filter" 
-                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-                                <option value="">Semua Kelas</option>
-                                @if(isset($classes))
-                                    @foreach($classes as $class)
-                                        <option value="{{ $class->id }}">{{ $class->name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                        </div>
-
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Task Filter -->
                         <div>
                             <label for="task_filter" class="block text-sm font-medium text-gray-700">Filter Tugas</label>
@@ -84,14 +70,6 @@
                                 <option value="even">Genap</option>
                             </select>
                         </div>
-
-                        <!-- Search Input -->
-                        <div>
-                            <label for="search_input" class="block text-sm font-medium text-gray-700">Cari Nama Siswa</label>
-                            <input type="text" id="search_input" 
-                                placeholder="Ketik nama siswa..."
-                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-                        </div>
                     </div>
 
                     <!-- Action Buttons -->
@@ -105,7 +83,7 @@
                         </div>
                         
                         <button onclick="redirectToCreatePage()" 
-                            class="inline-flex items-center px-4 py-2 border border-green-700 text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200">
+                            class="inline-flex items-center px-4 py-2 border border-green-700 text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200">
                             <span class="iconify mr-2 text-lg" data-icon="mdi:plus"></span>
                             Tambah Nilai
                         </button>
@@ -115,7 +93,7 @@
                 <!-- Grades Table Section -->
                 <div class="p-4 bg-gray-50 rounded-lg">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-medium text-gray-700 border-b pb-2">Daftar Nilai Siswa</h3>
+                        <h3 class="text-lg font-medium text-gray-700 border-b pb-2">Daftar Nilai Siswa - {{ $className ?? 'Kelas' }}</h3>
                         <div class="text-sm text-gray-500">
                             Total: <span id="totalRecords">0</span> data
                         </div>
@@ -141,7 +119,6 @@
                                         @foreach($studentGrades as $grade)
                                             <tr class="grade-row {{ $rowIndex % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}"
                                                 data-student-name="{{ strtolower($grade->student->name ?? '') }}"
-                                                data-class-id="{{ $grade->student->class_id ?? '' }}"
                                                 data-task-name="{{ $grade->task_name }}"
                                                 data-task-type="{{ $grade->type }}"
                                                 data-semester="{{ $grade->grades->semester ?? '' }}"
@@ -235,13 +212,7 @@
                                     Tidak ada data nilai yang tersedia.
                                 </p>
                             </div>
-                            <div class="mt-4">
-                                <button onclick="redirectToCreatePage()" 
-                                    class="inline-flex items-center px-4 py-2 border border-green-700 text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200">
-                                    <span class="iconify mr-2 text-lg" data-icon="mdi:plus"></span>
-                                    Tambah Nilai
-                                </button>
-                            </div>
+                         
                         </div>
                     @endif
 
@@ -284,58 +255,42 @@
         }
 
         function initializeFilters() {
-            const classFilter = document.getElementById('class_filter');
             const taskFilter = document.getElementById('task_filter');
             const typeFilter = document.getElementById('type_filter');
             const semesterFilter = document.getElementById('semester_filter');
-            const searchInput = document.getElementById('search_input');
             const resetBtn = document.getElementById('resetFilterBtn');
 
             // Add event listeners for filters
-            [classFilter, taskFilter, typeFilter, semesterFilter, searchInput].forEach(element => {
+            [taskFilter, typeFilter, semesterFilter].forEach(element => {
                 if (element) {
                     element.addEventListener('change', applyFilters);
-                    if (element.type === 'text') {
-                        element.addEventListener('input', debounce(applyFilters, 300));
-                    }
                 }
             });
 
             // Reset filter functionality
             resetBtn.addEventListener('click', function() {
-                classFilter.value = '';
                 taskFilter.value = '';
                 typeFilter.value = '';
                 semesterFilter.value = '';
-                searchInput.value = '';
                 applyFilters();
                 showAlert('success', 'Filter telah direset');
             });
         }
 
         function applyFilters() {
-            const classFilter = document.getElementById('class_filter').value;
             const taskFilter = document.getElementById('task_filter').value;
             const typeFilter = document.getElementById('type_filter').value;
             const semesterFilter = document.getElementById('semester_filter').value;
-            const searchValue = document.getElementById('search_input').value.toLowerCase();
 
             const rows = document.querySelectorAll('.grade-row');
             let visibleCount = 0;
 
             rows.forEach((row, index) => {
-                const studentName = row.getAttribute('data-student-name');
-                const classId = row.getAttribute('data-class-id');
                 const taskName = row.getAttribute('data-task-name');
                 const taskType = row.getAttribute('data-task-type');
                 const semester = row.getAttribute('data-semester');
 
                 let shouldShow = true;
-
-                // Apply class filter
-                if (classFilter && classId !== classFilter) {
-                    shouldShow = false;
-                }
 
                 // Apply task filter
                 if (taskFilter && taskName !== taskFilter) {
@@ -349,11 +304,6 @@
 
                 // Apply semester filter
                 if (semesterFilter && semester !== semesterFilter) {
-                    shouldShow = false;
-                }
-
-                // Apply search filter
-                if (searchValue && !studentName.includes(searchValue)) {
                     shouldShow = false;
                 }
 
@@ -392,18 +342,6 @@
                 const rows = document.querySelectorAll('.grade-row');
                 totalRecords.textContent = rows.length;
             }
-        }
-
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
         }
 
         function toggleEditMode(button) {
@@ -612,11 +550,6 @@
                 button.disabled = false;
                 button.innerHTML = originalHtml;
             });
-        }
-
-        function editGrade(gradeId) {
-            // This function is now replaced by toggleEditMode
-            showAlert('info', `Edit grade dengan ID: ${gradeId} (Fitur dalam pengembangan)`);
         }
 
         function deleteGrade(gradeId) {

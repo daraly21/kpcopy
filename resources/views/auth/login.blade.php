@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Sistem Pengelolaan Nilai SDN Cijedil') }} - Login</title>
-    <link rel="icon" type="image/png" href="https://ucarecdn.com/140db37d-4117-4b98-bc0
+    <link rel="icon" type="image/png"
+        href="https://ucarecdn.com/140db37d-4117-4b98-bc0
     System: 0-20e8d0147903/WhatsApp_Image_20250430_at_105328_AM__1_removebgpreview.png">
     <style>
         .clip-trapezoid {
@@ -17,16 +19,18 @@
     </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
+
 <body class="font-sans text-gray-900 antialiased">
     <div class="relative min-h-screen w-full">
         <!-- Gambar Latar Belakang (Sisi Kiri) -->
-        <div class="relative flex-1 bg-cover bg-center min-h-screen"
-             style="background-image: url('https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=1170&auto=format&fit=crop');">
+        <div class="relative flex-1 bg-cover bg-right min-h-screen"
+            style="background-image: url('https://ucarecdn.com/78962b32-6083-4274-9af4-9c0883d043cf/WhatsAppImage20250901at110026_0346c0c1.jpg');">
             <div class="absolute inset-0 bg-black opacity-80"></div>
 
             <!-- Navbar -->
             <div class="absolute top-6 left-6 flex items-center z-10 px-3">
-                <img src="https://ucarecdn.com/140db37d-4117-4b98-bc00-20e8d0147903/WhatsApp_Image_20250430_at_105328_AM__1_removebgpreview.png" alt="Logo SDN CIJEDIL" class="w-10 h-10">
+                <img src="https://ucarecdn.com/140db37d-4117-4b98-bc00-20e8d0147903/WhatsApp_Image_20250430_at_105328_AM__1_removebgpreview.png"
+                    alt="Logo SDN CIJEDIL" class="w-10 h-10">
                 <span class="text-white font-semibold ml-2 text-lg">SDN Cijedil</span>
             </div>
 
@@ -44,7 +48,8 @@
         </div>
 
         <!-- Form Login Mengambang -->
-        <div class="absolute top-0 right-0 bottom-0 h-full w-full md:w-2/4 pl-20 text-white px-8 py-12 flex flex-col 
+        <div
+            class="absolute top-0 right-0 bottom-0 h-full w-full md:w-2/4 pl-20 text-white px-8 py-12 flex flex-col 
         justify-center items-center clip-trapezoid shadow-2xl backdrop-blur-md bg-opacity-90 bg-gradient-to-b from-[#030330] to-[#03044b]">
             <h2 class="text-3xl font-bold mb-6">Login</h2>
 
@@ -54,16 +59,9 @@
                 <!-- Alamat Email -->
                 <div class="mb-6">
                     <label for="email" class="block text-sm text-blue-100 mb-2">Email</label>
-                    <input 
-                        id="email" 
-                        type="email" 
-                        name="email" 
-                        value="{{ old('email') }}" 
-                        required 
-                        autofocus 
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
                         autocomplete="username"
-                        class="w-full px-4 py-2 rounded bg-white text-black border border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200" 
-                    />
+                        class="w-full px-4 py-2 rounded bg-white text-black border border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200" />
                     @error('email')
                         <p class="text-red-300 text-xs mt-2">{{ $message }}</p>
                     @enderror
@@ -72,14 +70,8 @@
                 <!-- Kata Sandi -->
                 <div class="mb-6">
                     <label for="password" class="block text-sm text-blue-100 mb-2">Kata Sandi</label>
-                    <input 
-                        id="password" 
-                        type="password"
-                        name="password"
-                        required 
-                        autocomplete="current-password"
-                        class="w-full px-4 py-2 rounded bg-white text-black border border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                    />
+                    <input id="password" type="password" name="password" required autocomplete="current-password"
+                        class="w-full px-4 py-2 rounded bg-white text-black border border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-200" />
                     @error('password')
                         <p class="text-red-300 text-xs mt-2">{{ $message }}</p>
                     @enderror
@@ -100,24 +92,20 @@
                     </div> --}}
 
                     @if (Route::has('password.request'))
-                        <a 
-                            href="{{ route('password.request') }}" 
-                            class="text-sm text-blue-200 hover:text-white"
-                        >
+                        <a href="{{ route('password.request') }}" class="text-sm text-blue-200 hover:text-white">
                             Lupa kata sandi?
                         </a>
                     @endif
                 </div>
 
                 <!-- Tombol Masuk -->
-                <button 
-                    type="submit" 
-                    class="w-full py-2 px-2 bg-white text-black rounded font-semibold hover:bg-blue-100 transition"
-                >
+                <button type="submit"
+                    class="w-full py-2 px-2 bg-white text-black rounded font-semibold hover:bg-blue-100 transition">
                     Masuk
                 </button>
             </form>
         </div>
     </div>
 </body>
+
 </html>

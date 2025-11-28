@@ -55,16 +55,16 @@
     </style>
 </head>
 <body>
-    <div class="header clearfix">
+      <div class="header clearfix">
         <div class="left-header">
             <p><strong>Mapel:</strong> {{ $subject->name }}</p>
             <p><strong>Kelas:</strong> {{ $class->name }}</p>
         </div>
         <div class="center-header">
-            <p><strong>DAFTAR NILAI MI.......................... TH. {{ $year }}/{{ $year + 1 }}</strong></p>
+            <p><strong>DAFTAR NILAI {{ strtoupper($subject->name) }} TH. {{ $year }}/{{ $year + 1 }}</strong></p>
         </div>
         <div class="right-header">
-            <p><strong>SEMESTER:</strong> {{ $semester == 'Odd' ? '1 (GASAL)' : '2 (GENAP)' }}</p>
+            <p><strong>SEMESTER:</strong> {{ $semester == 'Odd' ? '1 (GANJIL)' : '2 (GENAP)' }}</p>
         </div>
     </div>
 
@@ -75,21 +75,15 @@
                 <th rowspan="3">No</th>
                 <th rowspan="3">NIS</th>
                 <th rowspan="3">Nama Siswa</th>
-                <th colspan="18">FORMATIF</th>
+                <th colspan="12">FORMATIF</th>
                 <th colspan="2" rowspan="2">SUMATIF</th>
                 <th rowspan="3">Nilai Akhir</th>
-                <th rowspan="3">Predikat</th>
             </tr>
             <tr>
                 <th colspan="6">TERTULIS (A)</th>
-                <th colspan="6">PENGAMATAN (B)</th>
-                <th colspan="6">TUGAS (P)</th>
+                <th colspan="6">NON TERTULIS (B)</th>
             </tr>
             <tr>
-                @for ($i = 1; $i <= 5; $i++)
-                    <th>{{ $i }}</th>
-                @endfor
-                <th>RT2</th>
                 @for ($i = 1; $i <= 5; $i++)
                     <th>{{ $i }}</th>
                 @endfor
@@ -113,26 +107,20 @@
                         <td>{{ $student['written'][$i] }}</td>
                     @endfor
                     <td>{{ $student['average_written'] ?? '-' }}</td>
-                    <!-- Observation scores (Pengamatan) -->
+                    <!-- Observation scores (Non Tertulis) -->
                     @for ($i = 0; $i < 5; $i++)
                         <td>{{ $student['observation'][$i] }}</td>
                     @endfor
                     <td>{{ $student['average_observation'] ?? '-' }}</td>
-                    <!-- sumatif scores (Tugas) -->
-                    @for ($i = 0; $i < 5; $i++)
-                        <td>{{ $student['sumatif'][$i] }}</td>
-                    @endfor
-                    <td>{{ $student['average_sumatif'] ?? '-' }}</td>
                     <!-- Sumatif scores -->
                     <td>{{ $student['midterm_score'] ?? '-' }}</td>
                     <td>{{ $student['final_exam_score'] ?? '-' }}</td>
                     <!-- Final scores -->
                     <td>{{ $student['final_score'] ?? '-' }}</td>
-                    <td>{{ $student['grade_letter'] }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="24">Tidak ada data nilai untuk filter yang dipilih</td>
+                    <td colspan="18">Tidak ada data nilai untuk filter yang dipilih</td>
                 </tr>
             @endforelse
         </tbody>

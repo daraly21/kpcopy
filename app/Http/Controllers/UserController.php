@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\ClassModel;           
-use App\Models\Subject;             
+use App\Models\Subject;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -15,18 +16,40 @@ class UserController extends Controller
     /**
      * List pengguna + data pendukung untuk modal CRUD di index.
      */
-    public function index()
-    {
-        // Ambil users beserta role, class, subject
-        $users = User::with(['roles', 'class', 'subject'])->latest()->get();
+public function index()
+{
+    $users = User::with(['roles', 'class', 'subject'])->get();
 
-        // Dropdown role, kelas, mapel
-        $roles    = Role::orderBy('id')->get();
-        $classes  = ClassModel::orderBy('name')->get();
-        $subjects = Subject::orderBy('name')->get();
+    // Urutkan sesuai keinginan
+    $users = $users->sortBy(function ($user) {
+        $roleName = $user->roles->first()->name ?? '';
 
-        return view('users.index', compact('users', 'roles', 'classes', 'subjects'));
-    }
+        // Prioritas role
+        $roleOrder = [
+            'Admin'       => 1,
+            'Wali Kelas'  => 2,
+            'Guru Mapel'  => 3,
+        ];
+
+        $priority = $roleOrder[$roleName] ?? 99;
+
+        // Untuk Wali Kelas, urutkan berdasarkan angka kelas
+        if ($roleName === 'Wali Kelas' && $user->class) {
+            preg_match('/\d+/', $user->class->name, $matches);
+            $classNumber = $matches[0] ?? 99;
+        } else {
+            $classNumber = 999;
+        }
+
+        return [$priority, $classNumber, $user->name];
+    });
+
+    $roles    = Role::orderBy('id')->get();
+    $classes  = ClassModel::orderBy('name')->get();
+    $subjects = Subject::orderBy('name')->get();
+
+    return view('users.index', compact('users', 'roles', 'classes', 'subjects'));
+}
 
     /**
      * Simpan user baru.
@@ -70,6 +93,7 @@ class UserController extends Controller
 
     /**
      * Update user.
+     * AUTO-SYNC: Jika user ini punya relasi teacher, update nama dan email di teacher
      */
     public function update(Request $request, User $user)
     {
@@ -100,6 +124,14 @@ class UserController extends Controller
         }
         $user->save();
 
+        // 🔥 AUTO-SYNC: Jika user ini punya relasi teacher, update nama dan email
+        if ($user->teacher) {
+            $user->teacher->update([
+                'nama_lengkap'  => $user->name,
+                'contact_email' => $user->email,
+            ]);
+        }
+
         // Sinkronkan role Spatie (jika digunakan)
         if ($role = Role::find($roleId)) {
             $user->syncRoles([$role->name]);
@@ -110,9 +142,15 @@ class UserController extends Controller
 
     /**
      * Hapus user.
+     * 🔥 AUTO-SYNC: Jika user ini punya teacher, putuskan relasi (set user_id = null)
      */
     public function destroy(User $user)
     {
+        // Putuskan relasi dengan teacher jika ada
+        if ($user->teacher) {
+            $user->teacher->update(['user_id' => null]);
+        }
+        
         $user->delete();
         return redirect()->route('admin.users.index')->with('success', 'User berhasil dihapus.');
     }

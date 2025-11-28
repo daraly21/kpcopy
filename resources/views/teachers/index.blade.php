@@ -107,10 +107,19 @@
                                         {{ ($teachers->currentPage() - 1) * $teachers->perPage() + $loop->iteration }}
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="text-sm font-medium text-gray-900">{{ $t->nama_lengkap }}</div>
-                                        @if ($t->contact_email)
-                                            <div class="text-xs text-gray-500">{{ $t->contact_email }}</div>
-                                        @endif
+                                        <div class="flex items-center gap-2">
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900">{{ $t->nama_lengkap }}
+                                                </div>
+                                                @if ($t->contact_email)
+                                                    <div class="text-xs text-gray-500">{{ $t->contact_email }}</div>
+                                                @endif
+                                            </div>
+                                            @if ($t->user_id)
+                                                <span class="iconify text-blue-500 text-sm"
+                                                    title="Auto-Sync dengan User: {{ $t->user->name ?? '' }}"></span>
+                                            @endif
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-700">
                                         @if ($t->nip)
@@ -171,7 +180,7 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit"
-                                                        onclick="return confirm('⚠️ Yakin ingin menghapus guru ini?\n\nData yang akan dihapus:\n- Nama: {{ $t->nama_lengkap }}\n- NIP: {{ $t->nip ?? '-' }}\n- NUPTK: {{ $t->nuptk ?? '-' }}\n\nTindakan ini tidak dapat dibatalkan!')"
+                                                        onclick="return confirm(' Yakin ingin menghapus guru ini?\n\nData yang akan dihapus:\n- Nama: {{ $t->nama_lengkap }}\n- NIP: {{ $t->nip ?? '-' }}\n- NUPTK: {{ $t->nuptk ?? '-' }}\n\nTindakan ini tidak dapat dibatalkan!')"
                                                         class="text-red-600 hover:text-red-900" title="Hapus">
                                                         <span class="iconify text-xl" data-icon="mdi:trash-can"></span>
                                                     </button>
@@ -256,15 +265,70 @@
                             <input type="hidden" name="id" x-model="form.id">
 
                             {{-- Step 1: Data Pribadi --}}
-                            <div x-show="currentStep === 1" class="space-y-4">
+                            <div x-show="currentStep === 1" class="space-y-6">
+
+                                {{-- Link User - DIPINDAHKAN KE ATAS --}}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                        Link User (Opsional)
+                                        <span class="iconify text-blue-500 text-lg"
+                                            title="Auto-Sync: Nama & Email akan otomatis sinkron dengan User"></span>
+                                    </label>
+                                    <select name="user_id" x-model="form.user_id" @change="syncFromUser()"
+                                        class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">- Tidak terhubung dengan User -</option>
+                                        @foreach ($availableUsers as $user)
+                                            <option value="{{ $user->id }}" data-name="{{ $user->name }}"
+                                                data-email="{{ $user->email }}" data-class="{{ $user->class_id }}"
+                                                {{-- ↑ TAMBAHKAN INI --}}
+                                                {{ $user->id == ($teacher->user_id ?? old('user_id')) ? 'selected' : '' }}>
+                                                {{ $user->name }} ({{ $user->email }})
+                                            </option>
+                                        @endforeach
+
+                                        {{-- Jika sedang edit dan user sudah terhubung, tetap tampilkan --}}
+                                        @if (($teacher ?? false) && $teacher->user_id && !$availableUsers->contains('id', $teacher->user_id))
+                                            @php $currentUser = $teacher->user; @endphp
+                                            <option value="{{ $currentUser->id }}" data-name="{{ $currentUser->name }}"
+                                                data-email="{{ $currentUser->email }}"
+                                                data-class="{{ $currentUser->class_id }}" selected>
+                                                {{ $currentUser->name }} ({{ $currentUser->email }}) ← Sedang digunakan
+                                            </option>
+                                        @endif
+                                    </select>
+                                    <div class="text-xs text-blue-600 mt-1 flex items-center gap-1">
+                                        <span class="iconify" data-icon="mdi:information"></span>
+                                        <span>Nama & Email akan otomatis terisi & sinkron dari User yang dipilih</span>
+                                    </div>
+                                </div>
+
+                                {{-- Info Auto-Sync --}}
+                                <div x-show="form.user_id" class="bg-blue-50 border border-blue-200 rounded-md p-3">
+                                    <div class="flex items-start">
+                                        <span class="iconify text-blue-600 text-xl mr-2 flex-shrink-0 mt-0.5"
+                                            data-icon="mdi:information"></span>
+                                        <div class="text-blue-800 text-sm">
+                                            <p class="font-medium">Auto-Sync Aktif</p>
+                                            <p class="text-xs mt-1">Nama, Email, dan Wali Kelas otomatis sinkron dengan
+                                                User. Perubahan di User akan otomatis mengupdate data guru.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="md:col-span-2">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                                            Nama Lengkap <span class="text-red-500">*</span>
+                                        <label
+                                            class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                            Nama Lengkap
+                                            <span class="text-red-500" x-show="!form.user_id">*</span>
+                                            <span x-show="form.user_id"
+                                                class="text-xs text-blue-600 font-normal">(Auto-Sync dari User)</span>
                                         </label>
                                         <input type="text" name="nama_lengkap" x-model="form.nama_lengkap"
+                                            :readonly="form.user_id !== ''"
+                                            :class="form.user_id ? 'bg-gray-100 cursor-not-allowed' : ''"
                                             class="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                            required>
+                                            :required="!form.user_id">
                                         <div x-show="errors.nama_lengkap"
                                             class="text-red-500 text-xs mt-1 flex items-center">
                                             <span class="iconify mr-1" data-icon="mdi:alert-circle"></span>
@@ -302,32 +366,30 @@
                                             class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                     </div>
 
-                                    <div class="md:col-span-2">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
+                                    {{-- Contact Email dipindah ke sebelah Tanggal Lahir --}}
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                            Contact Email
+                                            <span x-show="form.user_id"
+                                                class="text-xs text-blue-600 font-normal">(Auto-Sync dari User)</span>
+                                        </label>
                                         <input type="email" name="contact_email" x-model="form.contact_email"
+                                            :readonly="form.user_id !== ''"
+                                            :class="form.user_id ? 'bg-gray-100 cursor-not-allowed' : ''"
                                             class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div x-show="errors.contact_email"
+                                            class="text-red-500 text-xs mt-1 flex items-center">
+                                            <span class="iconify mr-1" data-icon="mdi:alert-circle"></span>
+                                            <span x-text="errors.contact_email"></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {{-- Step 2: Data Kepegawaian --}}
+                            {{-- Step 2: Data Kepegawaian (NIP & NUPTK tetap di sini) --}}
                             <div x-show="currentStep === 2" class="space-y-4">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="md:col-span-2">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Link User
-                                            (Opsional)</label>
-                                        <select name="user_id" x-model="form.user_id"
-                                            class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                            <option value="">- Pilih User -</option>
-                                            @foreach ($availableUsers as $user)
-                                                <option value="{{ $user->id }}">{{ $user->name }}
-                                                    ({{ $user->email }})</option>
-                                            @endforeach
-                                        </select>
-                                        <div class="text-xs text-gray-500 mt-1">Hubungkan dengan akun user yang sudah ada
-                                        </div>
-                                    </div>
-
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1">NIP</label>
                                         <input type="text" name="nip" x-model="form.nip"
@@ -341,7 +403,8 @@
                                         <input type="text" name="nuptk" x-model="form.nuptk"
                                             class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                             placeholder="Masukkan NUPTK">
-                                        <div class="text-xs text-gray-500 mt-1">Otomatis PPPK jika diisi</div>
+                                        <div class="text-xs text-gray-500 mt-1">Otomatis Honorer jika hanya NUPTK yang
+                                            diisi</div>
                                     </div>
                                 </div>
 
@@ -352,27 +415,35 @@
                                         <div class="text-amber-800 text-sm">
                                             <p class="font-medium mb-1">Informasi Penting:</p>
                                             <ul class="list-disc list-inside space-y-1 text-xs">
-                                                <li>Status Kerja: Jika <strong>PPPK</strong> NIP diisi, Jika
-                                                    <strong>Honorer</strong> NUPTK Diisi</li>
-                                                <li>User, NIP, NUPTK, dan Email <strong>harus unik</strong> (tidak boleh
-                                                    duplikat)</li>
+                                                <li>Jika <strong>NIP</strong> diisi â†’ Status <strong>PPPK</strong></li>
+                                                <li>Jika hanya <strong>NUPTK</strong> diisi â†’ Status
+                                                    <strong>Honorer</strong>
+                                                </li>
+                                                <li>User, NIP, NUPTK, dan Email <strong>harus unik</strong></li>
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {{-- Step 3: Tugas Mengajar --}}
+                            {{-- Step 3: Tugas Mengajar (tetap sama) --}}
                             <div x-show="currentStep === 3" class="space-y-4">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label
-                                            class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                                            class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
                                             Wali Kelas (Opsional)
+                                            <span x-show="form.user_id"
+                                                class="text-xs text-blue-600 font-normal">(Auto-Sync dari User)</span>
+                                            {{-- ↑ TAMBAHKAN INI --}}
                                             <span class="iconify text-amber-500" data-icon="mdi:shield-alert"
                                                 title="Kelas harus unik"></span>
                                         </label>
                                         <select name="class_id" x-model="form.class_id"
+                                            :readonly="form.user_id !== ''"
+                                            :disabled="form.user_id !== ''"
+                                            :class="form.user_id ? 'bg-gray-100 cursor-not-allowed' : ''"
+                                            {{-- ↑ TAMBAHKAN 3 BARIS INI --}}
                                             class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                             <option value="">- Tidak menjadi wali -</option>
                                             @foreach ($classes as $c)
@@ -381,8 +452,7 @@
                                         </select>
                                         <div class="text-xs text-amber-600 mt-1 flex items-center">
                                             <span class="iconify mr-1" data-icon="mdi:alert"></span>
-                                            <strong>Satu kelas hanya boleh 1 wali</strong> - Sistem akan menolak jika kelas
-                                            sudah punya wali
+                                            <strong>Satu kelas hanya boleh 1 wali</strong>
                                         </div>
                                     </div>
 
@@ -402,8 +472,6 @@
                                         </div>
                                     </div>
                                 </div>
-
-                
                             </div>
 
                             {{-- Navigation Buttons --}}
@@ -427,7 +495,7 @@
                                     </button>
 
                                     <button type="submit" x-show="currentStep === 3"
-                                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-all duration-200 flex items-center">
+                                        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-all duration-200 flex items-center">
                                         <span class="iconify mr-2" data-icon="mdi:content-save"></span>
                                         Simpan Data
                                     </button>
@@ -535,28 +603,49 @@
                     };
                 },
 
+                // ðŸ”¥ Sync nama dan email dari User yang dipilih
+                // 🔥 Sync nama, email, dan class dari User yang dipilih
+                syncFromUser() {
+                    if (this.form.user_id) {
+                        const select = document.querySelector('select[name="user_id"]');
+                        const selectedOption = select.options[select.selectedIndex];
+
+                        if (selectedOption) {
+                            this.form.nama_lengkap = selectedOption.getAttribute('data-name') || '';
+                            this.form.contact_email = selectedOption.getAttribute('data-email') || '';
+                            this.form.class_id = selectedOption.getAttribute('data-class') || ''; // ← TAMBAHKAN INI
+                        }
+                    } else {
+                        // Jika user_id dikosongkan, kosongkan nama, email, dan class
+                        if (!this.isEdit) {
+                            this.form.nama_lengkap = '';
+                            this.form.contact_email = '';
+                            this.form.class_id = ''; // ← TAMBAHKAN INI
+                        }
+                    }
+                },
+
                 validateAndSubmit(e) {
                     let ok = true;
                     this.resetErrors();
 
                     // Validasi Step 1: Data Pribadi
-
-                    if (!this.form.nama_lengkap || this.form.nama_lengkap.trim() === '') {
-                        this.errors.nama_lengkap = 'Nama guru wajib diisi';
+                    // Nama hanya wajib jika tidak ada user_id
+                    if (!this.form.user_id && (!this.form.nama_lengkap || this.form.nama_lengkap.trim() === '')) {
+                        this.errors.nama_lengkap = 'Nama guru wajib diisi jika tidak menghubungkan dengan user';
                         ok = false;
                     }
-
                     // Tambahkan validasi angka di nama
-                    else if (/[0-9]/.test(this.form.nama_lengkap)) {
+                    else if (this.form.nama_lengkap && /[0-9]/.test(this.form.nama_lengkap)) {
                         this.errors.nama_lengkap = 'Nama lengkap tidak boleh mengandung angka';
                         ok = false;
                     }
-
                     // Atau lebih ketat (hanya izinkan huruf, spasi, ', -, .)
-                    else if (!/^[a-zA-Z\s'\-\.]+$/.test(this.form.nama_lengkap)) {
+                    else if (this.form.nama_lengkap && !/^[a-zA-Z\s'\-\.]+$/.test(this.form.nama_lengkap)) {
                         this.errors.nama_lengkap = 'Nama hanya boleh berisi huruf, spasi, titik, strip, dan tanda petik';
                         ok = false;
                     }
+
                     if (!this.form.jenis_kelamin) {
                         this.errors.jenis_kelamin = 'Jenis kelamin wajib dipilih';
                         ok = false;
@@ -584,7 +673,8 @@
 
                         // Show alert
                         alert(
-                            '⚠️ Mohon periksa kembali data yang Anda masukkan!\n\nPastikan semua field yang wajib diisi sudah terisi dengan benar.');
+                            ' Mohon periksa kembali data yang Anda masukkan!\n\nPastikan semua field yang wajib diisi sudah terisi dengan benar.'
+                        );
                     }
                 }
             }

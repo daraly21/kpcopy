@@ -63,7 +63,7 @@
                                 @if ($selectedSubject && $selectedSemester)
                                     <!-- Table of students and their grades -->
                                     <div class="mb-8">
-                                        <h4 class="mb-4 text-lg font-semibold text-gray-800">Nilai: {{ $selectedSubject->name }} - Semester {{ $selectedSemester == 'Odd' ? '1 (GASAL)' : '2 (GENAP)' }}</h4>
+                                        <h4 class="mb-4 text-lg font-semibold text-gray-800">Nilai: {{ $selectedSubject->name }} - Semester {{ $selectedSemester == 'Odd' ? '1 (Ganjil)' : '2 (Genap)' }}</h4>
 
                                         <div class="overflow-x-auto border border-gray-200 rounded-lg hide-scrollbar">
                                             <table class="min-w-full border border-gray-300">
@@ -79,7 +79,7 @@
                                                     </tr>
                                                     <tr>
                                                         <th colspan="6" class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">TERTULIS (A)</th>
-                                                        <th colspan="6" class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">PENGAMATAN (B)</th>
+                                                        <th colspan="6" class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">NON TERTULIS (B)</th>
                                                     </tr>
                                                     <tr>
                                                         @for ($i = 1; $i <= 5; $i++)

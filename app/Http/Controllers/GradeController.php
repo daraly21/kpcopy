@@ -185,89 +185,124 @@ class GradeController extends Controller
         // }
     }
 
-    public function store_batch(Request $request)
-    {
-        $user = Auth::user();
-        // Validasi input
-        $request->validate([
-            'subject_id' => 'required|exists:subjects,id',
-            'task_name' => 'required|string',
-            'grade_data' => 'required|json',
-            'assignment_type' => 'required|in:written,observation,sumatif',
-            'semester' => 'required|in:odd,even',
-        ]);
-    
-        $subjectId = $request->subject_id;
-        $taskName = $request->task_name;
-        $assignmentType = $request->assignment_type;
-        $semester = $request->semester;
-        $gradeData = json_decode($request->grade_data, true);
-        
-        // Menggunakan transaksi database
-        DB::beginTransaction();
-        try {
-            // Dapatkan semua ID siswa di kelas wali kelas sekali saja
-            $classStudentIds = Cache::remember('class_students_'.$user->class_id, 30, function() use ($user) {
-                return Student::where('class_id', $user->class_id)
-                            ->pluck('id')
-                            ->toArray();
-            });
-            
-            // Siapkan array untuk batch insert
-            $gradeTasks = [];
-            $studentIds = [];
-            
-            // Persiapkan data untuk batch insert
-            foreach ($gradeData as $studentId => $score) {
-                // Skip jika siswa tidak di kelas ini atau nilai tidak valid
-                if (!in_array($studentId, $classStudentIds) || $score < 0 || $score > 100) {
-                    continue;
-                }
-                
-                // Buat atau ambil data grade
-                $grade = Grade::updateOrCreate(
-                    [
-                        'student_id' => $studentId,
-                        'subject_id' => $subjectId,
-                        'semester' => $semester
-                    ],
-                    ['score' => $score]
-                );
-        
-                // Siapkan data untuk batch insert
-                $gradeTasks[] = [
-                    'subject_id' => $subjectId,
-                    'task_name' => $taskName,
-                    'score' => $score,
-                    'student_id' => $studentId,
-                    'type' => $assignmentType,
-                    'grades_id' => $grade->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-                
-                $studentIds[] = $studentId;
-            }
-            
-            // Batch insert sekali saja untuk semua data
-            if (!empty($gradeTasks)) {
-                GradeTask::insert($gradeTasks);
-            }
-            
-            DB::commit();
-            $updatedCount = count($studentIds);
-            return redirect()->back()->with([
-            'success'               => "Berhasil menyimpan nilai untuk {$updatedCount} siswa.",
-            'show_notification_prompt' => true,                 // flag untuk JS
-            'notification_subject_id'  => $subjectId,           // mata pelajaran yang dipilih
-            'notification_task_name'   => $taskName,            // nama tugas yang dipilih
-        ]);
-          
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal menyimpan nilai: ' . $e->getMessage());
+public function store_batch(Request $request)
+{
+    $user = Auth::user();
+
+    $request->validate([
+        'subject_id'      => 'required|exists:subjects,id',
+        'task_name'       => 'required|string|max:255',
+        'grade_data'      => 'required|json',
+        'assignment_type' => 'required|in:written,observation,sumatif',
+        'semester'        => 'required|in:odd,even',
+    ]);
+
+    $subjectId      = $request->subject_id;
+    $taskName       = trim($request->task_name);
+    $assignmentType = $request->assignment_type;
+    $semester       = $request->semester;
+    $gradeData      = json_decode($request->grade_data, true);
+
+    // Normalisasi task_name untuk perbandingan (case insensitive + trim)
+    $normalizedTaskName = strtolower(trim($taskName));
+
+    // Tugas yang hanya boleh ada SATU KALI per siswa per mata pelajaran per semester
+    $uniqueTasks = ['uts', 'uas'];
+
+    if (in_array($normalizedTaskName, $uniqueTasks)) {
+
+        // Ambil semua student_id yang akan diinput
+        $studentIds = array_keys($gradeData);
+
+        // Cek apakah sudah ada UTS/UAS untuk siswa-siswa ini pada:
+        // - subject_id yang sama
+        // - semester yang sama (dari tabel grades)
+        // - task_name yang sama (di grade_tasks)
+        $existing = DB::table('grade_tasks')
+            ->join('grades', 'grade_tasks.grades_id', '=', 'grades.id')
+            ->where('grade_tasks.subject_id', $subjectId)
+            ->where('grades.semester', $semester)
+            ->whereIn('grade_tasks.student_id', $studentIds)
+            ->whereRaw('LOWER(TRIM(grade_tasks.task_name)) = ?', $normalizedTaskName)
+            ->select('grade_tasks.student_id', 'grade_tasks.task_name', 'grades.semester')
+            ->get();
+
+        if ($existing->isNotEmpty()) {
+            $studentNames = Student::whereIn('id', $existing->pluck('student_id'))
+                ->pluck('name')
+                ->implode(', ');
+
+            return redirect()->back()->with('error', 
+                "Nilai " . strtoupper($taskName) . " sudah pernah diinput untuk siswa ini"
+            );
         }
     }
+
+    // === PROSES PENYIMPANAN ===
+    DB::beginTransaction();
+    try {
+        $classStudentIds = Cache::remember('class_students_'.$user->class_id, 60, function () use ($user) {
+            return Student::where('class_id', $user->class_id)->pluck('id')->toArray();
+        });
+
+        $gradeTasksToInsert = [];
+        $updatedStudents = [];
+
+        foreach ($gradeData as $studentId => $score) {
+            $score = (int) $score;
+
+            if (!in_array($studentId, $classStudentIds) || $score < 0 || $score > 100) {
+                continue;
+            }
+
+            // Buat atau update record di tabel grades (rapor akhir)
+            $grade = Grade::updateOrCreate(
+                [
+                    'student_id' => $studentId,
+                    'subject_id' => $subjectId,
+                    'semester'   => $semester
+                ],
+                [
+                    'score' => $score // sementara, nanti bisa dihitung rata-rata otomatis
+                ]
+            );
+
+            // Siapkan data untuk insert ke grade_tasks
+            $gradeTasksToInsert[] = [
+                'student_id'   => $studentId,
+                'subject_id'   => $subjectId,
+                'task_name'    => $taskName,
+                'score'        => $score,
+                'type'         => $assignmentType,
+                'grades_id'    => $grade->id,
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ];
+
+            $updatedStudents[] = $studentId;
+        }
+
+        // Insert semua sekaligus (batch)
+        if (!empty($gradeTasksToInsert)) {
+            GradeTask::insert($gradeTasksToInsert);
+        }
+
+        DB::commit();
+
+        $count = count($updatedStudents);
+
+        return redirect()->back()->with([
+            'success'                   => "Berhasil menyimpan nilai {$taskName} untuk {$count} siswa.",
+            'show_notification_prompt' => true,
+            'notification_subject_id'  => $subjectId,
+            'notification_task_name'   => $taskName,
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()->with('error', 'Gagal menyimpan nilai: ' . $e->getMessage());
+    }
+}
 
     public function update(Request $request, $id)
     {

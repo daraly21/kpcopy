@@ -48,47 +48,43 @@ class GradesExport implements FromCollection, WithHeadings, WithStyles, WithColu
             'Mapel: ' . $this->subject->name,
             null,
             null,
-            'DAFTAR NILAI MI.......................... TH. ' . $this->year . '/' . ($this->year + 1),
-            null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-            'SEMESTER: ' . ($this->semester == 'Odd' ? '1 (GASAL)' : '2 (GENAP)'),
-            null, null, null, null
+            'DAFTAR NILAI ' . strtoupper($this->subject->name) . ' TH. ' . $this->year . '/' . ($this->year + 1),
+            null, null, null, null, null, null, null, null, null, null, null,
+            'SEMESTER: ' . ($this->semester == 'Odd' ? '1 (GANJIL)' : '2 (GENAP)'),
+            null, null
         ]);
 
         // Baris 2: Kelas
         $rows->push([
             'Kelas: ' . $this->class->name,
-            null,
-            null,
-            null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
+            null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
         ]);
 
         // Baris 3: Kosong
-        $rows->push(array_fill(0, 25, null));
+        $rows->push(array_fill(0, 18, null));
 
         // Baris 4-6: Header tabel
         $rows->push([
             'No', 'NIS', 'Nama Siswa',
-            'FORMATIF', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+            'FORMATIF', null, null, null, null, null, null, null, null, null, null, null,
             'SUMATIF', null,
-            'NILAI AKHIR', 'PREDIKAT', 'DESKRIPSI'
+            'Nilai Akhir'
         ]);
 
         $rows->push([
             null, null, null,
             'TERTULIS (A)', null, null, null, null, null,
-            'PENGAMATAN (B)', null, null, null, null, null,
-            'TUGAS (P)', null, null, null, null, null,
+            'NON TERTULIS (B)', null, null, null, null, null,
             null, null,
-            null, null, null
+            null
         ]);
 
         $rows->push([
             null, null, null,
             '1', '2', '3', '4', '5', 'RT2',
             '1', '2', '3', '4', '5', 'RT2',
-            '1', '2', '3', '4', '5', 'RT2',
             'UTS', 'UAS',
-            null, null, null
+            null
         ]);
 
         // Baris data siswa
@@ -104,27 +100,18 @@ class GradesExport implements FromCollection, WithHeadings, WithStyles, WithColu
                 $student['written'][3],
                 $student['written'][4],
                 $student['average_written'] ?? '-',
-                // Pengamatan
+                // Non Tertulis (Observation)
                 $student['observation'][0],
                 $student['observation'][1],
                 $student['observation'][2],
                 $student['observation'][3],
                 $student['observation'][4],
                 $student['average_observation'] ?? '-',
-                // Tugas
-                $student['homework'][0],
-                $student['homework'][1],
-                $student['homework'][2],
-                $student['homework'][3],
-                $student['homework'][4],
-                $student['average_homework'] ?? '-',
                 // Sumatif
                 $student['midterm_score'] ?? '-',
                 $student['final_exam_score'] ?? '-',
                 // Akhir
-                $student['final_score'] ?? '-',
-                $student['grade_letter'] ?? '-',
-                $this->getDescription($student['grade_letter'] ?? '-')
+                $student['final_score'] ?? '-'
             ]);
         }
 
@@ -146,31 +133,23 @@ class GradesExport implements FromCollection, WithHeadings, WithStyles, WithColu
     {
         return [
             'A' => 5,   // No
-            'B' => 10,  // NIS
-            'C' => 20,  // Nama Siswa
+            'B' => 12,  // NIS
+            'C' => 25,  // Nama Siswa
             'D' => 8,   // Tertulis 1
             'E' => 8,   // Tertulis 2
             'F' => 8,   // Tertulis 3
             'G' => 8,   // Tertulis 4
             'H' => 8,   // Tertulis 5
             'I' => 8,   // RT2 Tertulis
-            'J' => 8,   // Pengamatan 1
-            'K' => 8,   // Pengamatan 2
-            'L' => 8,   // Pengamatan 3
-            'M' => 8,   // Pengamatan 4
-            'N' => 8,   // Pengamatan 5
-            'O' => 8,   // RT2 Pengamatan
-            'P' => 8,   // Tugas 1
-            'Q' => 8,   // Tugas 2
-            'R' => 8,   // Tugas 3
-            'S' => 8,   // Tugas 4
-            'T' => 8,   // Tugas 5
-            'U' => 8,   // RT2 Tugas
-            'V' => 8,   // UTS
-            'W' => 8,   // UAS
-            'X' => 10,  // Nilai Akhir
-            'Y' => 10,  // Predikat
-            'Z' => 20,  // Deskripsi
+            'J' => 8,   // Non Tertulis 1
+            'K' => 8,   // Non Tertulis 2
+            'L' => 8,   // Non Tertulis 3
+            'M' => 8,   // Non Tertulis 4
+            'N' => 8,   // Non Tertulis 5
+            'O' => 8,   // RT2 Non Tertulis
+            'P' => 8,   // UTS
+            'Q' => 8,   // UAS
+            'R' => 10,  // Nilai Akhir
         ];
     }
 
@@ -181,30 +160,29 @@ class GradesExport implements FromCollection, WithHeadings, WithStyles, WithColu
     {
         // Merge cells untuk header
         $sheet->mergeCells('A1:C1'); // Mapel
-        $sheet->mergeCells('D1:U1'); // Judul
-        $sheet->mergeCells('V1:Y1'); // Semester
+        $sheet->mergeCells('D1:O1'); // Judul
+        $sheet->mergeCells('P1:R1'); // Semester
         $sheet->mergeCells('A2:C2'); // Kelas
-        $sheet->mergeCells('D2:Y2'); // Kosong
+        $sheet->mergeCells('D2:R2'); // Kosong
 
-        $sheet->mergeCells('D4:U4'); // FORMATIF
-        $sheet->mergeCells('V4:W4'); // SUMATIF
+        $sheet->mergeCells('D4:O4'); // FORMATIF
+        $sheet->mergeCells('P4:Q4'); // SUMATIF
         $sheet->mergeCells('D5:I5'); // TERTULIS (A)
-        $sheet->mergeCells('J5:O5'); // PENGAMATAN (B)
-        $sheet->mergeCells('P5:U5'); // TUGAS (P)
+        $sheet->mergeCells('J5:O5'); // NON TERTULIS (B)
 
         // Styling header
-        $sheet->getStyle('A1:Y1')->applyFromArray([
+        $sheet->getStyle('A1:R1')->applyFromArray([
             'font' => ['bold' => true],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT],
         ]);
-        $sheet->getStyle('D1:U1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('V1:Y1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('D1:O1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('P1:R1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
         $sheet->getStyle('A2:C2')->applyFromArray([
             'font' => ['bold' => true],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT],
         ]);
 
-        $sheet->getStyle('A4:Z4')->applyFromArray([
+        $sheet->getStyle('A4:R4')->applyFromArray([
             'font' => ['bold' => true],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
             'fill' => [
@@ -212,7 +190,7 @@ class GradesExport implements FromCollection, WithHeadings, WithStyles, WithColu
                 'startColor' => ['argb' => 'FFF0F0F0'],
             ],
         ]);
-        $sheet->getStyle('A5:Z5')->applyFromArray([
+        $sheet->getStyle('A5:R5')->applyFromArray([
             'font' => ['bold' => true],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
             'fill' => [
@@ -220,7 +198,7 @@ class GradesExport implements FromCollection, WithHeadings, WithStyles, WithColu
                 'startColor' => ['argb' => 'FFF0F0F0'],
             ],
         ]);
-        $sheet->getStyle('A6:Z6')->applyFromArray([
+        $sheet->getStyle('A6:R6')->applyFromArray([
             'font' => ['bold' => true],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
             'fill' => [
@@ -231,7 +209,7 @@ class GradesExport implements FromCollection, WithHeadings, WithStyles, WithColu
 
         // Border untuk semua sel
         $highestRow = $sheet->getHighestRow();
-        $sheet->getStyle('A1:Z' . $highestRow)->applyFromArray([
+        $sheet->getStyle('A1:R' . $highestRow)->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
@@ -246,7 +224,7 @@ class GradesExport implements FromCollection, WithHeadings, WithStyles, WithColu
         // Styling untuk baris data (zebra effect)
         for ($row = 7; $row <= $highestRow; $row++) {
             if (($row - 7) % 2 == 1) {
-                $sheet->getStyle('A' . $row . ':Z' . $row)->applyFromArray([
+                $sheet->getStyle('A' . $row . ':R' . $row)->applyFromArray([
                     'fill' => [
                         'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                         'startColor' => ['argb' => 'FFF7FAFC'],
@@ -263,96 +241,87 @@ class GradesExport implements FromCollection, WithHeadings, WithStyles, WithColu
      */
     private function getGradeData()
     {
-        $students = Student::where('class_id', $this->class_id)
-            ->select('id', 'nis', 'name')
-            ->get()
-            ->keyBy('id');
-        
-        $grades = Grade::where('subject_id', $this->subject_id)
-            ->where('semester', $this->semester)
-            ->whereIn('student_id', $students->pluck('id'))
-            ->select('id', 'student_id', 'midterm_score', 'final_exam_score', 'average_written', 'average_observation', 'average_homework', 'final_score', 'grade_letter')
-            ->get()
-            ->keyBy('student_id');
-        
-        $gradeTasks = GradeTask::whereIn('grades_id', $grades->pluck('id'))
-            ->select('grades_id', 'type', 'score')
-            ->orderBy('created_at')
-            ->get()
-            ->groupBy('grades_id');
-        
         $result = [];
-        
-        foreach ($students as $student) {
-            $studentData = [
-                'student_id' => $student->id,
-                'student_number' => $student->nis,
-                'name' => $student->name,
-                'written' => array_fill(0, 5, '-'),
-                'observation' => array_fill(0, 5, '-'),
-                'homework' => array_fill(0, 5, '-'),
-                'average_written' => null,
-                'average_observation' => null,
-                'average_homework' => null,
-                'midterm_score' => null,
-                'final_exam_score' => null,
-                'final_score' => null,
-                'grade_letter' => '-'
-            ];
-            
-            if (isset($grades[$student->id])) {
-                $grade = $grades[$student->id];
-                
-                $writtenCounter = 0;
-                $observationCounter = 0;
-                $homeworkCounter = 0;
-                
-                if (isset($gradeTasks[$grade->id])) {
-                    foreach ($gradeTasks[$grade->id] as $task) {
-                        if ($task->type === 'written' && $writtenCounter < 5) {
-                            $studentData['written'][$writtenCounter] = $task->score;
-                            $writtenCounter++;
-                        } elseif ($task->type === 'observation' && $observationCounter < 5) {
-                            $studentData['observation'][$observationCounter] = $task->score;
-                            $observationCounter++;
-                        } elseif ($task->type === 'homework' && $homeworkCounter < 5) {
-                            $studentData['homework'][$homeworkCounter] = $task->score;
-                            $homeworkCounter++;
-                        }
-                    }
-                }
-                
-                $studentData['average_written'] = $grade->average_written;
-                $studentData['average_observation'] = $grade->average_observation;
-                $studentData['average_homework'] = $grade->average_homework;
-                $studentData['midterm_score'] = $grade->midterm_score;
-                $studentData['final_exam_score'] = $grade->final_exam_score;
-                $studentData['final_score'] = $grade->final_score;
-                $studentData['grade_letter'] = $grade->grade_letter;
-            }
-            
-            $result[] = $studentData;
-        }
-        
-        return $result;
-    }
+        $updates = [];
 
-    /**
-     * Mendapatkan deskripsi berdasarkan grade_letter
-     */
-    private function getDescription($grade)
-    {
-        switch ($grade) {
-            case 'A':
-                return 'Sangat Baik';
-            case 'B':
-                return 'Baik';
-            case 'C':
-                return 'Cukup';
-            case 'D':
-                return 'Perlu Bimbingan';
-            default:
-                return '';
-        }
+        Student::where('class_id', $this->class_id)
+               ->select('id', 'nis', 'name')
+               ->chunk(10, function ($students) use (&$result, &$updates) {
+                   $studentIds = $students->pluck('id')->toArray();
+                   $grades = Grade::whereIn('student_id', $studentIds)
+                                  ->where('subject_id', $this->subject_id)
+                                  ->where('semester', $this->semester)
+                                  ->get()
+                                  ->keyBy('student_id');
+
+                   foreach ($students as $student) {
+                       $studentData = [
+                           'student_id' => $student->id,
+                           'student_number' => $student->nis,
+                           'name' => $student->name,
+                           'written' => array_fill(0, 5, '-'),
+                           'observation' => array_fill(0, 5, '-'),
+                           'average_written' => null,
+                           'average_observation' => null,
+                           'midterm_score' => null,
+                           'final_exam_score' => null,
+                           'final_score' => null
+                       ];
+                       
+                       $grade = $grades->get($student->id);
+                       
+                       if ($grade) {
+                           $tasks = $grade->gradeTasks;
+                           
+                           $writtenCounter = 0;
+                           $observationCounter = 0;
+                           $sumatifCounter = 0;
+                           
+                           $writtenScores = [];
+                           $observationScores = [];
+                           $sumatifScores = [];
+                           
+                           foreach ($tasks as $task) {
+                               if ($task->type === 'written' && $writtenCounter < 5) {
+                                   $studentData['written'][$writtenCounter] = $task->score;
+                                   $writtenScores[] = $task->score;
+                                   $writtenCounter++;
+                               } elseif ($task->type === 'observation' && $observationCounter < 5) {
+                                   $studentData['observation'][$observationCounter] = $task->score;
+                                   $observationScores[] = $task->score;
+                                   $observationCounter++;
+                               } elseif ($task->type === 'sumatif' && $sumatifCounter < 2) {
+                                   $sumatifScores[] = $task->score;
+                                   $sumatifCounter++;
+                               }
+                           }
+                           
+                           $averageWritten = !empty($writtenScores) ? array_sum($writtenScores) / count($writtenScores) : null;
+                           $averageObservation = !empty($observationScores) ? array_sum($observationScores) / count($observationScores) : null;
+                           
+                           $midtermScore = isset($sumatifScores[0]) ? $sumatifScores[0] : null;
+                           $finalExamScore = isset($sumatifScores[1]) ? $sumatifScores[1] : null;
+                           
+                           $components = array_filter([
+                               $averageWritten,
+                               $averageObservation,
+                               $midtermScore,
+                               $finalExamScore
+                           ], fn($value) => !is_null($value));
+                           
+                           $finalScore = !empty($components) ? array_sum($components) / count($components) : 0;
+                           
+                           $studentData['average_written'] = $averageWritten;
+                           $studentData['average_observation'] = $averageObservation;
+                           $studentData['midterm_score'] = $midtermScore;
+                           $studentData['final_exam_score'] = $finalExamScore;
+                           $studentData['final_score'] = $finalScore;
+                       }
+                       
+                       $result[] = $studentData;
+                   }
+               });
+
+        return $result;
     }
 }
