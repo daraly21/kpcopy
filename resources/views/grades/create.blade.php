@@ -60,7 +60,7 @@
                         
                         <!-- Task Type Selection -->
                         <div>
-                            <label for="task_type" class="block text-sm font-medium text-gray-700">Tipe Tugas </label>
+                            <label for="task_type" class="block text-sm font-medium text-gray-700">Template Tugas </label>
                             <select id="task_type" 
                                 class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                                 onchange="updateTaskName()">
@@ -296,10 +296,11 @@
         });
     });
 
-    function updateTaskName() {
+function updateTaskName() {
         const taskType = document.getElementById('task_type').value;
         const taskNameInput = document.getElementById('task_name');
-        
+        const assignmentTypeSelect = document.getElementById('assignment_type');
+
         const taskNames = {
             'nilai_harian_1': 'Nilai Harian 1',
             'nilai_harian_2': 'Nilai Harian 2',
@@ -308,16 +309,45 @@
             'uas': 'UAS',
             'custom': ''
         };
-        
+
         if (taskType && taskType !== 'custom') {
             taskNameInput.value = taskNames[taskType];
             taskNameInput.readOnly = true;
+
+            // Jika UTS atau UAS → paksa Sumatif dan disable pilihan
+            if (taskType === 'uts' || taskType === 'uas') {
+                assignmentTypeSelect.value = 'sumatif';
+                assignmentTypeSelect.disabled = true;
+                assignmentTypeSelect.classList.add('bg-gray-100', 'cursor-not-allowed');
+            } else {
+                // Bukan UTS/UAS → boleh pilih tipe tugas bebas
+                assignmentTypeSelect.disabled = false;
+                assignmentTypeSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            }
         } else {
+            // Custom
             taskNameInput.value = '';
             taskNameInput.readOnly = false;
             taskNameInput.focus();
+
+            // Kembalikan ke kondisi normal
+            assignmentTypeSelect.disabled = false;
+            assignmentTypeSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            assignmentTypeSelect.value = ''; // kosongkan biar user pilih
         }
     }
+
+    // Agar saat halaman pertama kali load (misal dari session/error), tetap sinkron
+    document.addEventListener('DOMContentLoaded', function () {
+        // Jalankan sekali saat load agar status benar
+        updateTaskName();
+
+        // Jika ada task_type yang sudah terpilih (misal kembali dari error), langsung jalankan
+        const initialTaskType = document.getElementById('task_type').value;
+        if (initialTaskType) {
+            updateTaskName();
+        }
+    });
 
     function validateScore(input) {
         let value = parseInt(input.value);
