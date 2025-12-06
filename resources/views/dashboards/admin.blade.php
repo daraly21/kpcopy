@@ -7,76 +7,83 @@
 
     <div class="p-6">
 
-    {{-- Info Cards --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white shadow rounded-2xl p-4 flex items-center">
-            <div class="text-blue-500 text-3xl mr-4">👨‍🏫</div>
-            <div>
-                <p class="text-gray-600 text-sm">Total Wali Kelas</p>
-                <p class="text-xl font-bold">{{ $totalWaliKelas }}</p>
-            </div>
-        </div>
-        <div class="bg-white shadow rounded-2xl p-4 flex items-center">
-            <div class="text-green-500 text-3xl mr-4">🧑‍🎓</div>
-            <div>
-                <p class="text-gray-600 text-sm">Total Seluruh Siswa</p>
-                <p class="text-xl font-bold">{{ $totalSiswa }}</p>
-            </div>
-        </div>
-        <div class="bg-white shadow rounded-2xl p-4 flex items-center">
-            <div class="text-purple-500 text-3xl mr-4">🏫</div>
-            <div>
-                <p class="text-gray-600 text-sm">Total Kelas</p>
-                <p class="text-xl font-bold">{{ $totalKelas }}</p>
-            </div>
-        </div>
-        <div class="bg-white shadow rounded-2xl p-4 flex items-center">
-            <div class="text-yellow-500 text-3xl mr-4">📚</div>
-            <div>
-                <p class="text-gray-600 text-sm">Total Mata Pelajaran</p>
-                <p class="text-xl font-bold">{{ $totalMapel }}</p>
-            </div>
-        </div>
+ {{-- Chart Section --}}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {{-- Chart 1: Jumlah Utama (pake Doughnut biar adil) --}}
+    <div class="bg-white shadow-xl rounded-2xl p-6">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800">Statistik Sekolah</h3>
+        <canvas id="mainChart" height="300"></canvas>
     </div>
 
-    {{-- Chart Section --}}
-    <div class="bg-white shadow rounded-2xl p-6">
-        <h2 class="text-lg font-semibold mb-4">Statistik Data Utama</h2>
-        <canvas id="dataChart" height="100"></canvas>
+    {{-- Chart 2: Perbandingan Detail (pake Horizontal Bar biar keliatan semua) --}}
+    <div class="bg-white shadow-xl rounded-2xl p-6">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800">Perbandingan Jumlah</h3>
+        <canvas id="compareChart" height="300"></canvas>
     </div>
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('dataChart').getContext('2d');
-    const dataChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Wali Kelas', 'Siswa', 'Kelas', 'Mata Pelajaran'],
-            datasets: [{
-                label: 'Jumlah',
-                data: [{{ $totalWaliKelas }}, {{ $totalSiswa }}, {{ $totalKelas }}, {{ $totalMapel }}],
-                backgroundColor: [
-                    'rgba(59, 130, 246, 0.7)',  // Blue
-                    'rgba(34, 197, 94, 0.7)',   // Green
-                    'rgba(139, 92, 246, 0.7)',  // Purple
-                    'rgba(250, 204, 21, 0.7)'   // Yellow
-                ],
-                borderRadius: 8,
-            }]
+// Pastikan data aman (null → 0)
+const waliKelas = {{ $totalWaliKelas ?? 0 }};
+const siswa     = {{ $totalSiswa ?? 0 }};
+const kelas     = {{ $totalKelas ?? 0 }};
+const mapel     = {{ $totalMapel ?? 0 }};
+
+// Chart 1: Doughnut (cantik + semua keliatan meski beda skala jauh)
+new Chart(document.getElementById('mainChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Wali Kelas', 'Siswa', 'Kelas', 'Mata Pelajaran'],
+        datasets: [{
+            data: [waliKelas, siswa, kelas, mapel],
+            backgroundColor: [
+                '#3B82F6', // blue-500
+                '#10B981', // green-500
+                '#8B5CF6', // purple-500
+                '#F59E0B'  // amber-500
+            ],
+            borderWidth: 3,
+            borderColor: '#fff',
+            hoverOffset: 20
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'bottom', labels: { padding: 20, font: { size: 14 } } },
+            tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.raw} orang/entri` } }
+        }
+    }
+});
+
+// Chart 2: Horizontal Bar (paling adil buat bandingin angka yang beda jauh)
+new Chart(document.getElementById('compareChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Wali Kelas', 'Siswa', 'Kelas', 'Mata Pelajaran'],
+        datasets: [{
+            label: 'Jumlah',
+            data: [waliKelas, siswa, kelas, mapel],
+            backgroundColor: '#6366F1',
+            borderRadius: 10,
+            borderSkipped: false,
+        }]
+    },
+    options: {
+        indexAxis: 'y', // ini yang bikin HORIZONTAL
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => `Jumlah: ${ctx.raw}` } }
         },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    }
-                }
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: { stepSize: siswa > 500 ? 100 : 10 }
             }
         }
-    });
+    }
+});
 </script>
 </x-app-layout>

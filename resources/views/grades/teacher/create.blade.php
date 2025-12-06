@@ -8,9 +8,29 @@
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
+{{-- Tambahkan ini tepat setelah <div class="max-w-7xl ..."> dan sebelum Breadcrumb --}}
+@if (session('success'))
+    <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded flex items-center">
+        <span class="iconify mr-2 text-xl" data-icon="mdi:check-circle-outline"></span>
+        <span>{{ session('success') }}</span>
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded flex items-center">
+        <span class="iconify mr-2 text-xl" data-icon="mdi:alert-circle-outline"></span>
+        <span>{{ session('error') }}</span>
+    </div>
+@endif
+
+@if (session('warning'))
+    <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded flex items-center">
+        <span class="iconify mr-2 text-xl" data-icon="mdi:information-outline"></span>
+        <span>{{ session('warning') }}</span>
+    </div>
+@endif
             {{-- Alert Messages --}}
-            @if($errors->any())
+            @if ($errors->any())
                 <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
                     <div class="flex items-start">
                         <span class="iconify text-red-600 text-xl mr-2 mt-0.5" data-icon="mdi:alert-circle"></span>
@@ -30,7 +50,8 @@
             <div class="flex items-center space-x-2 text-sm text-gray-600 mb-6">
                 <a href="{{ route('teacher.grades.select-class') }}" class="hover:text-indigo-600">Pilih Kelas</a>
                 <span class="iconify" data-icon="mdi:chevron-right"></span>
-                <a href="{{ route('teacher.grades.index', ['subjectId' => $subject->id]) }}?class_id={{ $classId }}&class_name={{ urlencode($className) }}" class="hover:text-indigo-600">{{ $className }}</a>
+                <a href="{{ route('teacher.grades.index', ['subjectId' => $subject->id]) }}?class_id={{ $classId }}&class_name={{ urlencode($className) }}"
+                    class="hover:text-indigo-600">{{ $className }}</a>
                 <span class="iconify" data-icon="mdi:chevron-right"></span>
                 <span class="text-gray-900 font-medium">Input Nilai Baru</span>
             </div>
@@ -43,43 +64,71 @@
                         <span class="iconify text-indigo-600 text-xl mr-2" data-icon="mdi:clipboard-edit"></span>
                         Input Nilai Siswa
                     </h3>
-                    <p class="text-gray-600 text-sm mt-1">Isi nilai untuk siswa yang ingin dinilai, kosongkan jika tidak ada nilai</p>
+                    <p class="text-gray-600 text-sm mt-1">Isi nilai untuk siswa yang ingin dinilai, kosongkan jika tidak
+                        ada nilai</p>
                 </div>
 
                 <form action="{{ route('teacher.grades.store-batch') }}" method="POST" class="p-6" id="gradeForm">
                     @csrf
-                    
-                    {{-- Hidden fields --}}
                     <input type="hidden" name="class_id" value="{{ $classId }}">
 
-                    {{-- Task Information --}}
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                    {{-- Task Information dengan Template --}}
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                        {{-- Template Tugas --}}
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Tugas/Ujian <span class="text-red-500">*</span></label>
-                            <input type="text" name="task_name" required value="{{ old('task_name') }}"
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Template Tugas</label>
+                            <select id="task_template"
+                                class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">Pilih Template</option>
+                                <option value="harian1">Nilai Harian 1</option>
+                                <option value="harian2">Nilai Harian 2</option>
+                                <option value="harian3">Nilai Harian 3</option>
+                                <option value="uts">UTS</option>
+                                <option value="uas">UAS</option>
+                                <option value="custom">Custom (Manual)</option>
+                            </select>
+                        </div>
+
+                        {{-- Nama Tugas --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Tugas/Ujian <span
+                                    class="text-red-500">*</span></label>
+                            <input type="text" name="task_name" id="task_name" required
+                                value="{{ old('task_name') }}"
                                 class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('task_name') border-red-500 @enderror"
                                 placeholder="Contoh: Ulangan Harian 1">
                             @error('task_name')
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                        
+
+                       {{-- Tipe Penilaian --}}
+<div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">
+        Tipe Penilaian <span class="text-red-500">*</span>
+    </label>
+    
+    <!-- Select untuk tampilan saja -->
+    <select id="assignment_type" required
+        class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('assignment_type') border-red-500 @enderror">
+        <option value="">- Pilih Tipe -</option>
+        <option value="written">Tugas Tertulis</option>
+        <option value="observation">Observasi</option>
+        <option value="sumatif">Sumatif</option>
+    </select>
+
+    <!-- Yang benar-benar dikirim ke server -->
+    <input type="hidden" name="assignment_type" id="hidden_assignment_type" value="{{ old('assignment_type') }}">
+
+    @error('assignment_type')
+        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+    @enderror
+</div>
+
+                        {{-- Semester --}}
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipe Penilaian <span class="text-red-500">*</span></label>
-                            <select name="assignment_type" required
-                                class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('assignment_type') border-red-500 @enderror">
-                                <option value="">- Pilih Tipe -</option>
-                                <option value="written" {{ old('assignment_type') == 'written' ? 'selected' : '' }}>Tugas Tertulis</option>
-                                <option value="observation" {{ old('assignment_type') == 'observation' ? 'selected' : '' }}>Observasi</option>
-                                <option value="sumatif" {{ old('assignment_type') == 'sumatif' ? 'selected' : '' }}>Sumatif</option>
-                            </select>
-                            @error('assignment_type')
-                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Semester <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Semester <span
+                                    class="text-red-500">*</span></label>
                             <select name="semester" required
                                 class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('semester') border-red-500 @enderror">
                                 <option value="">- Pilih Semester -</option>
@@ -90,40 +139,45 @@
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-
                     </div>
 
-                    @if($students->isNotEmpty())
-                        {{-- Students Table --}}
+                    {{-- Tabel Siswa --}}
+                    @if ($students->isNotEmpty())
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">No</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIS</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Siswa</th>
-                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Nilai (0-100)</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                                            No</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            NIS</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Nama Siswa</th>
+                                        <th
+                                            class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                                            Nilai (0-100)</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($students as $student)
+                                    @foreach ($students as $student)
                                         <tr class="hover:bg-gray-50">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $loop->iteration }}
-                                            </td>
+                                                {{ $loop->iteration }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                                {{ $student->nis ?? '-' }}
-                                            </td>
+                                                {{ $student->nis ?? '-' }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm font-medium text-gray-900">{{ $student->name }}</div>
+                                                <div class="text-sm font-medium text-gray-900">{{ $student->name }}
+                                                </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                <input type="number" 
-                                                    name="scores[{{ $student->id }}]" 
-                                                    min="0" max="100" step="0.1"
-                                                    value="{{ old('scores.' . $student->id) }}"
-                                                    class="w-20 border border-gray-300 rounded-md py-1 px-2 text-center focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 score-input @error('scores.' . $student->id) border-red-500 @enderror"
-                                                    placeholder="0-100">
+                                                <input type="number" name="scores[{{ $student->id }}]" min="0"
+                                                    max="100" value="{{ old('scores.' . $student->id) }}"
+                                                    class="score-input w-20 border border-gray-300 rounded-md py-1 px-2 text-center focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 @error('scores.' . $student->id) border-red-500 @enderror"
+                                                    placeholder="0-100"
+                                                    data-next-row="{{ $loop->iteration < $students->count() ? $loop->iteration + 1 : '' }}">
                                                 @error('scores.' . $student->id)
                                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                                 @enderror
@@ -134,231 +188,210 @@
                             </table>
                         </div>
 
-                        {{-- Validation Message for scores --}}
-                        @error('scores')
-                            <div class="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-                                <p class="text-sm">{{ $message }}</p>
-                            </div>
-                        @enderror
-
-                        {{-- Action Buttons --}}
+                        {{-- Tombol Aksi --}}
                         <div class="flex justify-between items-center pt-6 mt-6 border-t border-gray-200">
                             <a href="{{ route('teacher.grades.index', ['subjectId' => $subject->id]) }}?class_id={{ $classId }}&class_name={{ urlencode($className) }}"
-                               class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-all duration-200 flex items-center">
-                                <span class="iconify mr-2" data-icon="mdi:arrow-left"></span>
+                                class="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-all duration-200 flex items-center">
                                 Kembali
                             </a>
-                            
+
                             <div class="flex gap-3">
                                 <button type="button" onclick="clearAllScores()"
                                     class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-all duration-200 flex items-center">
-                                    <span class="iconify mr-2" data-icon="mdi:eraser"></span>
                                     Bersihkan Semua
                                 </button>
-                                
+
                                 <button type="submit" id="submitBtn"
                                     class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-all duration-200 flex items-center">
-                                    <span class="iconify mr-2" data-icon="mdi:content-save"></span>
                                     Simpan Nilai
                                 </button>
                             </div>
                         </div>
                     @else
-                        <div class="text-center py-12">
-                            <span class="iconify text-gray-400 text-6xl mb-4" data-icon="mdi:account-off"></span>
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak Ada Siswa</h3>
-                            <p class="text-gray-500">Belum ada siswa di kelas ini. Silakan hubungi admin untuk menambahkan siswa.</p>
-                        </div>
+                        <!-- sama seperti sebelumnya -->
                     @endif
                 </form>
             </div>
         </div>
     </div>
-
     <script>
-        // Form validation before submit
-        document.getElementById('gradeForm').addEventListener('submit', function(e) {
-            const taskName = document.querySelector('input[name="task_name"]').value.trim();
-            const assignmentType = document.querySelector('select[name="assignment_type"]').value;
-            const semester = document.querySelector('select[name="semester"]').value;
-            const scoreInputs = document.querySelectorAll('.score-input');
-            
-            let hasValidScore = false;
-            let hasError = false;
-            
-            // Check if required fields are filled
-            if (!taskName) {
-                showAlert('error', 'Nama tugas wajib diisi!');
-                e.preventDefault();
-                return;
-            }
-            
-            if (!assignmentType) {
-                showAlert('error', 'Tipe penilaian wajib dipilih!');
-                e.preventDefault();
-                return;
-            }
-            
-            if (!semester) {
-                showAlert('error', 'Semester wajib dipilih!');
-                e.preventDefault();
-                return;
-            }
-            
-            // Check if at least one score is filled and validate scores
-            scoreInputs.forEach(input => {
-                if (input.value !== '') {
-                    hasValidScore = true;
-                    const value = parseFloat(input.value);
-                    if (isNaN(value) || value < 0 || value > 100) {
-                        hasError = true;
-                    }
-                }
-            });
-            
-            if (!hasValidScore) {
-                showAlert('error', 'Silakan isi setidaknya satu nilai siswa!');
-                e.preventDefault();
-                return;
-            }
-            
-            if (hasError) {
-                showAlert('error', 'Terdapat nilai yang tidak valid. Pastikan nilai antara 0-100!');
-                e.preventDefault();
-                return;
-            }
-            
-            // Show loading state
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<span class="iconify animate-spin mr-2" data-icon="mdi:loading"></span>Menyimpan...';
-            
-            // Form will submit normally and redirect to index page
-        });
-
-        // Function to fill all scores with a specific value
-        function fillAllScores() {
-            const value = prompt('Masukkan nilai untuk semua siswa (0-100):');
-            if (value !== null && value !== '') {
-                const numValue = parseFloat(value);
-                if (numValue >= 0 && numValue <= 100) {
-                    document.querySelectorAll('.score-input').forEach(input => {
-                        input.value = value;
-                    });
-                    showAlert('success', `Semua nilai berhasil diisi dengan ${value}`);
-                } else {
-                    showAlert('error', 'Nilai harus antara 0-100');
-                }
-            }
-        }
-
-        // Function to clear all scores
-        function clearAllScores() {
-            if (confirm('Hapus semua nilai yang sudah diisi?')) {
-                document.querySelectorAll('.score-input').forEach(input => {
-                    input.value = '';
-                });
-                showAlert('info', 'Semua nilai telah dihapus');
-            }
-        }
-
-        // Validate score input on blur
         document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.score-input').forEach(input => {
+            const templateSelect = document.getElementById('task_template');
+            const taskNameInput = document.getElementById('task_name');
+            const typeSelect = document.getElementById('assignment_type');
+
+            // Template mapping
+            const templates = {
+                'harian1': {
+                    name: 'Nilai Harian 1',
+                    type: 'written'
+                },
+                'harian2': {
+                    name: 'Nilai Harian 2',
+                    type: 'written'
+                },
+                'harian3': {
+                    name: 'Nilai Harian 3',
+                    type: 'written'
+                },
+                'uts': {
+                    name: 'UTS',
+                    type: 'sumatif'
+                },
+                'uas': {
+                    name: 'UAS',
+                    type: 'sumatif'
+                },
+                'custom': {
+                    name: '',
+                    type: null
+                }
+            };
+
+           templateSelect.addEventListener('change', function () {
+    const val = this.value;
+    const typeSelect = document.getElementById('assignment_type');
+    const hiddenTypeInput = document.getElementById('hidden_assignment_type'); // kita tambah nanti
+
+    if (val && val !== 'custom') {
+        taskNameInput.value = templates[val].name;
+        taskNameInput.readOnly = true;
+
+        if (val === 'uts' || val === 'uas') {
+            // Paksa sumatif + visually disabled
+            typeSelect.value = 'sumatif';
+            typeSelect.disabled = true;
+            typeSelect.classList.add('bg-gray-100', 'cursor-not-allowed', 'opacity-70');
+
+            // Pastikan nilai tetap terkirim
+            hiddenTypeInput.value = 'sumatif';
+        } else {
+            typeSelect.value = templates[val].type;
+            typeSelect.disabled = false;
+            typeSelect.classList.remove('bg-gray-100', 'cursor-not-allowed', 'opacity-70');
+            hiddenTypeInput.value = templates[val].type;
+        }
+    } else {
+        taskNameInput.value = '';
+        taskNameInput.readOnly = false;
+        taskNameInput.focus();
+
+        typeSelect.disabled = false;
+        typeSelect.classList.remove('bg-gray-100', 'cursor-not-allowed', 'opacity-70');
+        typeSelect.value = '';
+        hiddenTypeInput.value = '';
+    }
+});
+
+            // Enter → pindah ke baris bawah
+            document.querySelectorAll('.score-input').forEach((input, index) => {
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const nextRow = this.closest('tr').nextElementSibling;
+                        if (nextRow) {
+                            const nextInput = nextRow.querySelector('.score-input');
+                            if (nextInput) {
+                                nextInput.focus();
+                                nextInput.select();
+                            }
+                        }
+                    }
+                });
+
+                // Hanya angka bulat (0-100), otomatis format saat blur
                 input.addEventListener('blur', function() {
                     if (this.value !== '') {
-                        const value = parseFloat(this.value);
-                        if (isNaN(value) || value < 0 || value > 100) {
-                            showAlert('error', 'Nilai harus antara 0-100');
-                            this.focus();
-                            this.select();
-                        }
+                        let val = parseInt(this.value);
+                        if (isNaN(val) || val < 0) val = 0;
+                        if (val > 100) val = 100;
+                        this.value = val; // tanpa desimal
                     }
                 });
-                
-                // Auto-format decimal places
-                input.addEventListener('change', function() {
-                    if (this.value !== '') {
-                        const value = parseFloat(this.value);
-                        if (!isNaN(value) && value >= 0 && value <= 100) {
-                            this.value = value.toFixed(1);
-                        }
-                    }
+
+                // Cegah input desimal
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
                 });
+            });
+
+            // Bersihkan semua nilai
+            window.clearAllScores = function() {
+                if (confirm('Hapus semua nilai yang sudah diisi?')) {
+                    document.querySelectorAll('.score-input').forEach(i => i.value = '');
+                }
+            };
+
+            // Submit dengan loading
+            document.getElementById('gradeForm').addEventListener('submit', function() {
+                const btn = document.getElementById('submitBtn');
+                btn.disabled = true;
+                btn.innerHTML = 'Menyimpan...';
             });
         });
 
-        // Alert function
-        function showAlert(type, message) {
-            // Remove existing alerts
-            const existingAlert = document.querySelector('.alert-message');
-            if (existingAlert) existingAlert.remove();
-            
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert-message mb-4 p-4 rounded-lg border-l-4 ${
-                type === 'error' ? 'bg-red-50 border-red-500 text-red-700' : 
-                type === 'success' ? 'bg-green-50 border-green-500 text-green-700' : 
-                'bg-blue-50 border-blue-500 text-blue-700'
-            }`;
-            alertDiv.innerHTML = `
-                <div class="flex items-center">
-                    <span class="iconify mr-2" data-icon="mdi:${
-                        type === 'error' ? 'alert-circle-outline' : 
-                        type === 'success' ? 'check-circle-outline' : 
-                        'information-outline'
-                    }"></span>
-                    <span>${message}</span>
-                </div>
-            `;
-            
-            // Insert alert at the top of the form container
-            const formContainer = document.querySelector('.bg-white.rounded-lg.shadow-sm');
-            formContainer.insertBefore(alertDiv, formContainer.firstChild);
-            
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                alertDiv.remove();
-            }, 5000);
-            
-            // Scroll to alert
-            alertDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Sinkronkan hidden input saat halaman pertama kali load (jika ada old input)
+document.addEventListener('DOMContentLoaded', function () {
+    const visibleSelect = document.getElementById('assignment_type');
+    const hiddenInput = document.getElementById('hidden_assignment_type');
+
+    // Jika ada old value (dari error validasi)
+    if (hiddenInput.value) {
+        visibleSelect.value = hiddenInput.value;
+        if (visibleSelect.value === 'sumatif') {
+            visibleSelect.disabled = true;
+            visibleSelect.classList.add('bg-gray-100', 'cursor-not-allowed', 'opacity-70');
         }
+    }
+
+    // Pastikan saat user pilih manual (bukan dari template), hidden ikut berubah
+    visibleSelect.addEventListener('change', function () {
+        if (!visibleSelect.disabled) {
+            hiddenInput.value = this.value;
+        }
+    });
+});
     </script>
 
     <style>
         /* Loading animation */
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
-        
+
         .animate-spin {
             animation: spin 1s linear infinite;
         }
-        
+
         /* Score input styling */
         .score-input {
             -webkit-appearance: none;
             -moz-appearance: textfield;
             appearance: textfield;
         }
-        
+
         .score-input::-webkit-inner-spin-button,
         .score-input::-webkit-outer-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
-        
+
         /* Hover effects */
         .score-input:hover {
             border-color: #6366f1;
         }
-        
+
         /* Focus styles */
         .score-input:focus {
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
-        
+
         /* Error state */
         .border-red-500:focus {
             box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
