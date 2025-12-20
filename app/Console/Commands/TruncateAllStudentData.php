@@ -22,14 +22,15 @@ class TruncateAllStudentData extends Command
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
         // Urutan penting: anak dulu, parent terakhir
-        DB::table('grade_tasks')->truncate();   // ganti jadi 'gradetask' kalau tabelnya tanpa underscore
+        DB::table('grade_tasks')->truncate();
         DB::table('grades')->truncate();
+        DB::table('student_classes')->truncate();  // TAMBAHAN: hapus relasi siswa-kelas
         DB::table('students')->truncate();
 
         // Nyalakan lagi
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        $this->info('Berhasil! Semua data students, grades, dan grade_tasks sudah dibersihkan + auto increment di-reset.');
+        $this->info('Berhasil! Semua data students, grades, grade_tasks, dan student_classes sudah dibersihkan + auto increment di-reset.');
     }
 }
 

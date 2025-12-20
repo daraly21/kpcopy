@@ -123,7 +123,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('grades/create/', [GradeController::class, 'create'])->name('grades.create');
         Route::post('grades/store/', [GradeController::class, 'store'])->name('grades.store');
-        Route::post('grades/batch', [GradeController::class, 'store_batch'])->name('grades.store_batch');
+        Route::post('grades/batch', [GradeController::class, 'store'])->name('grades.store_batch');
         Route::put('grade-tasks/{id}', [GradeController::class, 'update'])->name('grade_tasks.update');
         Route::delete('grade-tasks/{id}', [GradeController::class, 'destroy'])->name('grade_tasks.destroy');
 
@@ -161,7 +161,7 @@ Route::middleware(['auth'])->prefix('teacher')->name('teacher.')->group(function
 
         Route::get('/select-class', [TeacherGradeController::class, 'selectClass'])->name('select-class');
         Route::get('/{subjectId}/create', [TeacherGradeController::class, 'create'])->name('create');
-        Route::post('/store-batch', [TeacherGradeController::class, 'storeBatch'])->name('store-batch');
+        Route::post('/store-batch', [TeacherGradeController::class, 'store'])->name('store-batch');
         Route::get('/{subjectId}', [TeacherGradeController::class, 'index'])->name('index');
         Route::post('/{subjectId}/store', [TeacherGradeController::class, 'store'])->name('store');
         Route::put('/{id}', [TeacherGradeController::class, 'update'])->name('update');
@@ -178,7 +178,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('/profile/picture/edit', [ProfilePictureController::class, 'edit'])->name('profile.picture.edit');
+
     Route::put('/profile/picture/update', [ProfilePictureController::class, 'update'])->name('profile.picture.update');
 });
 

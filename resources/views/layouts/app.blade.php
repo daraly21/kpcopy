@@ -14,9 +14,9 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-    
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
     <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.6.2/fetch.min.js"></script>
@@ -56,7 +56,7 @@
                                         <div class="flex items-center">
                                             <div class="mr-2">
                                                 <!-- Gunakan URL dari profile_picture -->
-                                                <img src="{{ Auth::user()->profile_picture }}"
+                                                <img src="{{ Auth::user()->profile_picture ? asset('storage/' . Auth::user()->profile_picture) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&color=7F9CF5&background=EBF4FF' }}"
                                                     alt="{{ Auth::user()->name }}"
                                                     class="rounded-full h-8 w-8 object-cover">
                                             </div>

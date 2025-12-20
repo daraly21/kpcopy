@@ -65,7 +65,7 @@ public function index()
             'role'               => 'required|exists:roles,id',
             'class_id'           => 'nullable|exists:classes,id',
             'subject_id'         => 'nullable|exists:subjects,id',
-            'profile_picture'    => 'nullable|string', // simpan URL (mis. ucarecdn)
+            'profile_picture'    => 'nullable|string', // simpan path lokal
         ]);
 
         // Tentukan field tergantung role

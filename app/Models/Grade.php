@@ -19,6 +19,7 @@ class Grade extends Model
         'final_exam_score',
         'final_score',
         'grade_letter',
+        'academic_year_id',
     ];
 
     public function student()

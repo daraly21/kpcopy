@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AcademicYear;
 use App\Models\Grade;
 use App\Models\GradeTask;
 use App\Models\Subject;
 use App\Models\Student;
+use App\Models\StudentClass;
 use App\Models\ClassModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,28 +33,50 @@ class TeacherGradeController extends Controller
             abort(403, 'Akses ditolak. Anda bukan guru mata pelajaran.');
         }
 
+        // Ambil tahun ajaran aktif
+        $activeYear = AcademicYear::where('is_active', 1)->first();
+        if (!$activeYear) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Tahun ajaran aktif belum diset. Silakan hubungi admin.');
+        }
+
         $subject = Subject::findOrFail($user->subject_id);
+        
         // Ambil semua kelas dengan statistik
-        $classes = ClassModel::withCount('students')->get();
-        // Hitung statistik per kelas untuk mata pelajaran ini
+        $classes = ClassModel::all();
+        
+        // Hitung statistik per kelas untuk mata pelajaran ini (hanya tahun ajaran aktif)
         foreach ($classes as $class) {
+            // Ambil siswa di kelas pada tahun ajaran aktif
+            $studentIds = StudentClass::where('class_id', $class->id)
+                ->where('academic_year_id', $activeYear->id)
+                ->pluck('student_id');
+            
+            $class->students_count = $studentIds->count();
+            
             $totalTasks = GradeTask::where('subject_id', $user->subject_id)
-                ->whereHas('student', function ($query) use ($class) {
-                    $query->where('class_id', $class->id);
-                })->count();
+                ->whereIn('student_id', $studentIds)
+                ->count();
+                
             $class->total_tasks = $totalTasks;
             $class->completion_percentage = $class->students_count > 0 ? 
                 min(100, ($totalTasks / ($class->students_count * 5)) * 100) : 0; // Asumsi 5 tugas per siswa
         }
 
-        $totalStudents = Student::count();
-        $totalGrades = GradeTask::where('subject_id', $user->subject_id)->count();
+        // Total siswa dan nilai untuk tahun ajaran aktif
+        $totalStudentIds = StudentClass::where('academic_year_id', $activeYear->id)
+            ->pluck('student_id');
+        $totalStudents = $totalStudentIds->count();
+        $totalGrades = GradeTask::where('subject_id', $user->subject_id)
+            ->whereIn('student_id', $totalStudentIds)
+            ->count();
 
         return view('grades.teacher.select-class', [
             'subject' => $subject,
             'classes' => $classes,
             'totalStudents' => $totalStudents,
-            'totalGrades' => $totalGrades
+            'totalGrades' => $totalGrades,
+            'activeYear' => $activeYear
         ]);
     }
 
@@ -71,6 +95,13 @@ class TeacherGradeController extends Controller
                 'subject_id' => $user->subject_id
             ]);
             abort(403, 'Akses ditolak. Anda bukan guru mata pelajaran.');
+        }
+
+        // Ambil tahun ajaran aktif
+        $activeYear = AcademicYear::where('is_active', 1)->first();
+        if (!$activeYear) {
+            return redirect()->route('teacher.grades.select-class')
+                ->with('error', 'Tahun ajaran aktif belum diset. Silakan hubungi admin.');
         }
 
         $subject = Subject::findOrFail($user->subject_id);
@@ -94,7 +125,8 @@ class TeacherGradeController extends Controller
             'subject' => $subject->name,
             'subject_id' => $subject->id,
             'class_id' => $selectedClass,
-            'class_name' => $class->name
+            'class_name' => $class->name,
+            'academic_year_id' => $activeYear->id
         ]);
 
         $selectedTaskType = $request->input('task_name');
@@ -120,6 +152,7 @@ class TeacherGradeController extends Controller
             'students' => $students,
             'grades' => $grades,
             'task_types' => $taskTypes,
+            'activeYear' => $activeYear,
             'error' => $students->isEmpty() ? 'Tidak ada siswa di kelas ini. Silakan hubungi admin untuk menambahkan siswa.' : null
         ];
 
@@ -141,12 +174,26 @@ class TeacherGradeController extends Controller
             return collect();
         }
         
-        $students = Student::where('class_id', $classId)
+        // Ambil tahun ajaran aktif
+        $activeYear = AcademicYear::where('is_active', 1)->first();
+        if (!$activeYear) {
+            Log::warning('No active academic year set');
+            return collect();
+        }
+        
+        // Ambil siswa yang terdaftar di kelas pada tahun ajaran aktif
+        $studentIds = StudentClass::where('class_id', $classId)
+            ->where('academic_year_id', $activeYear->id)
+            ->pluck('student_id')
+            ->toArray();
+        
+        $students = Student::whereIn('id', $studentIds)
             ->orderBy('name')
-            ->get(['id', 'name', 'class_id']);
+            ->get(['id', 'name']);
             
         Log::info('Students retrieved for class', [
             'class_id' => $classId,
+            'academic_year_id' => $activeYear->id,
             'students_count' => $students->count(),
             'student_names' => $students->pluck('name')->toArray()
         ]);
@@ -154,71 +201,7 @@ class TeacherGradeController extends Controller
         return $students;
     }
 
-  public function store(Request $request)
-    {
-        $user = Auth::user();
-
-        if ($user->role_id != 3 || !$user->subject_id) {
-            return response()->json(['success' => false, 'message' => 'Akses ditolak'], 403);
-        }
-
-        if (method_exists($user, 'hasPermissionTo') && !$user->hasPermissionTo('kelola nilai')) {
-            return response()->json(['success' => false, 'message' => 'Anda tidak memiliki izin untuk mengelola nilai'], 403);
-        }
-
-        $validated = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'task_name'  => 'required|string|max:255',
-            'score'      => 'required|numeric|min:0|max:100',
-            'type'       => 'required|in:written,observation,sumatif',
-            'semester'   => 'required|in:Odd,Even',
-            'subject_id' => 'required|exists:subjects,id',
-        ]);
-
-        if ($validated['subject_id'] != $user->subject_id) {
-            return response()->json(['success' => false, 'message' => 'Anda tidak berhak mengelola nilai untuk mata pelajaran ini'], 403);
-        }
-
-        try {
-            DB::beginTransaction();
-
-            $grade = Grade::firstOrCreate(
-                [
-                    'student_id' => $validated['student_id'],
-                    'subject_id' => $validated['subject_id'],
-                    'semester'   => $validated['semester']
-                ],
-                ['score' => $validated['score']]
-            );
-
-            $gradeTask = GradeTask::create([
-                'student_id' => $validated['student_id'],
-                'subject_id' => $validated['subject_id'],
-                'task_name'  => $validated['task_name'],
-                'score'      => $validated['score'],
-                'type'       => $validated['type'],
-                'grades_id'  => $grade->id,
-            ]);
-
-            DB::commit();
-
-            $student = Student::find($validated['student_id']);
-
-            return response()->json([
-                'success' => true,
-                'message' => "Nilai {$validated['task_name']} untuk {$student->name} berhasil disimpan!",
-                'data'    => $gradeTask->load('student')
-            ], 201);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menyimpan nilai: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
+    
     public function update(Request $request, $id)
     {
         $user = Auth::user();
@@ -297,7 +280,10 @@ class TeacherGradeController extends Controller
         }
     }
 
-    public function storeBatch(Request $request)
+    /**
+     * Simpan nilai untuk beberapa siswa sekaligus (batch)
+     */
+    public function store(Request $request)
     {
         $user = Auth::user();
 
@@ -317,21 +303,30 @@ class TeacherGradeController extends Controller
         try {
             DB::beginTransaction();
 
+            // Ambil tahun ajaran aktif
+            $activeYear = AcademicYear::where('is_active', 1)->first();
+            if (!$activeYear) {
+                return redirect()->back()->with('error', 'Tahun ajaran aktif belum diset.');
+            }
+
             $savedCount = 0;
             foreach ($validated['scores'] as $studentId => $score) {
                 if ($score === null || $score === '') continue;
 
-                $student = Student::where('id', $studentId)
-                    ->where('class_id', $validated['class_id'])
-                    ->first();
+            // Verifikasi siswa terdaftar di kelas pada tahun ajaran aktif
+            $studentInClass = StudentClass::where('student_id', $studentId)
+                ->where('class_id', $validated['class_id'])
+                ->where('academic_year_id', $activeYear->id)
+                ->exists();
 
-                if (!$student) continue;
+            if (!$studentInClass) continue;
 
-                $grade = Grade::firstOrCreate(
+                $grade = Grade::updateOrCreate(
                     [
-                        'student_id' => $studentId,
-                        'subject_id' => $user->subject_id,
-                        'semester'   => $validated['semester']
+                        'student_id'       => $studentId,
+                        'subject_id'       => $user->subject_id,
+                        'semester'         => $validated['semester'],
+                        'academic_year_id' => $activeYear->id
                     ],
                     ['score' => $score]
                 );
@@ -410,8 +405,20 @@ class TeacherGradeController extends Controller
                 ->with('error', 'Kelas tidak ditemukan.');
         }
 
-        // Ambil semua siswa pada kelas ini
-        $students = Student::where('class_id', $classId)
+        // Ambil tahun ajaran aktif
+        $activeYear = AcademicYear::where('is_active', 1)->first();
+        if (!$activeYear) {
+            return redirect()->route('teacher.grades.select-class')
+                ->with('error', 'Tahun ajaran aktif belum diset.');
+        }
+
+        // Ambil siswa yang terdaftar di kelas pada tahun ajaran aktif
+        $studentIds = StudentClass::where('class_id', $classId)
+            ->where('academic_year_id', $activeYear->id)
+            ->pluck('student_id')
+            ->toArray();
+
+        $students = Student::whereIn('id', $studentIds)
             ->orderBy('name')
             ->get(['id', 'name', 'nis']);
 
@@ -472,9 +479,17 @@ class TeacherGradeController extends Controller
         $query = GradeTask::where('subject_id', $subjectId);
         
         if ($classId) {
-            $query->whereHas('student', function ($q) use ($classId) {
-                $q->where('class_id', $classId);
-            });
+            // Ambil tahun ajaran aktif
+            $activeYear = AcademicYear::where('is_active', 1)->first();
+            if ($activeYear) {
+                // Ambil student IDs dari StudentClass
+                $studentIds = StudentClass::where('class_id', $classId)
+                    ->where('academic_year_id', $activeYear->id)
+                    ->pluck('student_id')
+                    ->toArray();
+                
+                $query->whereIn('student_id', $studentIds);
+            }
         }
         
         $taskTypes = $query->distinct()->pluck('task_name')->filter()->values();
@@ -501,10 +516,30 @@ private function getGrades($subjectId, $classId, $taskType = null)
         return collect();
     }
     
-    $query = GradeTask::with(['student', 'subject', 'grade']) // TAMBAHKAN 'grade'
+    // Ambil tahun ajaran aktif
+    $activeYear = AcademicYear::where('is_active', 1)->first();
+    if (!$activeYear) {
+        Log::warning('No active academic year set for getGrades');
+        return collect();
+    }
+    
+    // Ambil student IDs dari StudentClass
+    $studentIds = StudentClass::where('class_id', $classId)
+        ->where('academic_year_id', $activeYear->id)
+        ->pluck('student_id')
+        ->toArray();
+    
+    Log::info('Student IDs for getGrades', [
+        'class_id' => $classId,
+        'student_ids' => $studentIds,
+        'count' => count($studentIds)
+    ]);
+    
+    $query = GradeTask::with(['student', 'subject', 'grade'])
         ->where('subject_id', $subjectId)
-        ->whereHas('student', function ($q) use ($classId) {
-            $q->where('class_id', $classId);
+        ->whereIn('student_id', $studentIds)
+        ->whereHas('grade', function($q) use ($activeYear) {
+            $q->where('academic_year_id', $activeYear->id);
         });
         
     if ($taskType) {
@@ -512,6 +547,14 @@ private function getGrades($subjectId, $classId, $taskType = null)
     }
     
     $grades = $query->latest()->get()->groupBy('student_id');
+    
+    Log::info('Grades retrieved with academic year filter', [
+        'subject_id' => $subjectId,
+        'class_id' => $classId,
+        'academic_year_id' => $activeYear->id,
+        'grades_count' => $grades->count(),
+        'total_grade_tasks' => $query->count()
+    ]);
     
     return $grades;
 }

@@ -35,11 +35,11 @@
                     Daftar Siswa ({{ $students->count() }} siswa)
                 </h3>
                 <div class="flex gap-2">
-                    {{-- <a href="{{ route('admin.siswa.promotion', ['class' => $class->id, 'academic_year_id' => $selectedYear->id]) }}"
+                    <a href="{{ route('admin.siswa.promotion', ['class' => $class->id, 'academic_year_id' => $selectedYear->id]) }}"
                         class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-md shadow-sm transition-all duration-200 flex items-center border border-green-700">
                         <span class="iconify text-xl mr-2" data-icon="mdi:arrow-up-bold-box-outline"></span>
                         Naik Kelas
-                    </a> --}}
+                    </a>
                     <button @click="openAddModal()"
                         class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-md shadow-sm transition-all duration-200 flex items-center border border-indigo-700">
                         <span class="iconify text-xl mr-2" data-icon="mdi:plus"></span>

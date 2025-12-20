@@ -18,7 +18,8 @@
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     <div class="mb-6 card">
-                        <div class="px-4 py-3 text-lg font-semibold text-gray-700 bg-gray-100 rounded-t-lg">Filter Daftar Nilai</div>
+                        <div class="px-4 py-3 text-lg font-semibold text-gray-700 bg-gray-100 rounded-t-lg">Filter Daftar
+                            Nilai</div>
 
                         <div class="p-4">
                             @if ($class)
@@ -30,9 +31,12 @@
                                 <form method="GET" action="{{ route('grades.export') }}" class="mb-6">
                                     <div class="flex flex-wrap items-end gap-4 mb-4">
                                         <div class="flex-1 min-w-[200px]">
-                                            <label for="subject_id" class="block mb-2 text-sm font-medium text-gray-700">Mata Pelajaran</label>
-                                            <select class="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                                    id="subject_id" name="subject_id" required>
+                                            <label for="subject_id"
+                                                class="block mb-2 text-sm font-medium text-gray-700">Mata
+                                                Pelajaran</label>
+                                            <select
+                                                class="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                                id="subject_id" name="subject_id" required>
                                                 <option value="">Pilih Mata Pelajaran</option>
                                                 @foreach ($subjects as $subject)
                                                     <option value="{{ $subject->id }}"
@@ -43,16 +47,21 @@
                                             </select>
                                         </div>
                                         <div class="flex-1 min-w-[200px]">
-                                            <label for="semester" class="block mb-2 text-sm font-medium text-gray-700">Semester</label>
-                                            <select class="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                                    id="semester" name="semester" required>
+                                            <label for="semester"
+                                                class="block mb-2 text-sm font-medium text-gray-700">Semester</label>
+                                            <select
+                                                class="w-full p-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                                id="semester" name="semester" required>
                                                 <option value="">Pilih Semester</option>
-                                                <option value="Odd" {{ request('semester') == 'Odd' ? 'selected' : '' }}>Ganjil</option>
-                                                <option value="Even" {{ request('semester') == 'Even' ? 'selected' : '' }}>Genap</option>
+                                                <option value="Odd"
+                                                    {{ request('semester') == 'Odd' ? 'selected' : '' }}>Ganjil</option>
+                                                <option value="Even"
+                                                    {{ request('semester') == 'Even' ? 'selected' : '' }}>Genap</option>
                                             </select>
                                         </div>
                                         <div class="flex-none">
-                                            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                            <button type="submit"
+                                                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                                 <i class="mr-1 fas fa-filter"></i> Filter
                                             </button>
                                         </div>
@@ -63,82 +72,124 @@
                                 @if ($selectedSubject && $selectedSemester)
                                     <!-- Table of students and their grades -->
                                     <div class="mb-8">
-                                        <h4 class="mb-4 text-lg font-semibold text-gray-800">Nilai: {{ $selectedSubject->name }} - Semester {{ $selectedSemester == 'Odd' ? '1 (Ganjil)' : '2 (Genap)' }}</h4>
+                                        <h4 class="mb-4 text-lg font-semibold text-gray-800">Nilai:
+                                            {{ $selectedSubject->name }} - Semester
+                                            {{ $selectedSemester == 'Odd' ? '1 (Ganjil)' : '2 (Genap)' }}</h4>
 
                                         <div class="overflow-x-auto border border-gray-200 rounded-lg hide-scrollbar">
                                             <table class="min-w-full border border-gray-300">
                                                 <!-- Table header -->
                                                 <thead class="bg-gray-50">
                                                     <tr>
-                                                        <th rowspan="3" class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-left text-gray-500 uppercase align-middle">No</th>
-                                                        <th rowspan="3" class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-left text-gray-500 uppercase align-middle">NIS</th>
-                                                        <th rowspan="3" class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-left text-gray-500 uppercase align-middle">Nama Siswa</th>
-                                                        <th colspan="12" class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">FORMATIF</th>
-                                                        <th colspan="2" rowspan="2" class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">SUMATIF</th>
-                                                        <th rowspan="3" class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase align-middle">Nilai Akhir</th>
+                                                        <th rowspan="3"
+                                                            class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-left text-gray-500 uppercase align-middle">
+                                                            No</th>
+                                                        <th rowspan="3"
+                                                            class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-left text-gray-500 uppercase align-middle">
+                                                            NIS</th>
+                                                        <th rowspan="3"
+                                                            class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-left text-gray-500 uppercase align-middle">
+                                                            Nama Siswa</th>
+                                                        <th colspan="12"
+                                                            class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">
+                                                            FORMATIF</th>
+                                                        <th colspan="2" rowspan="2"
+                                                            class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">
+                                                            SUMATIF</th>
+                                                        <th rowspan="3"
+                                                            class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase align-middle">
+                                                            Nilai Akhir</th>
                                                     </tr>
                                                     <tr>
-                                                        <th colspan="6" class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">TERTULIS (A)</th>
-                                                        <th colspan="6" class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">NON TERTULIS (B)</th>
+                                                        <th colspan="6"
+                                                            class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">
+                                                            TERTULIS (A)</th>
+                                                        <th colspan="6"
+                                                            class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">
+                                                            NON TERTULIS (B)</th>
                                                     </tr>
                                                     <tr>
                                                         @for ($i = 1; $i <= 5; $i++)
-                                                            <th class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">{{ $i }}</th>
+                                                            <th
+                                                                class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">
+                                                                {{ $i }}</th>
                                                         @endfor
-                                                        <th class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">RT2</th>
+                                                        <th
+                                                            class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">
+                                                            RT2</th>
                                                         @for ($i = 1; $i <= 5; $i++)
-                                                            <th class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">{{ $i }}</th>
+                                                            <th
+                                                                class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">
+                                                                {{ $i }}</th>
                                                         @endfor
-                                                        <th class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">RT2</th>
-                                                        <th class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">UTS</th>
-                                                        <th class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">UAS</th>
+                                                        <th
+                                                            class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">
+                                                            RT2</th>
+                                                        <th
+                                                            class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">
+                                                            UTS</th>
+                                                        <th
+                                                            class="p-2 border border-gray-300 text-xs font-medium tracking-wider text-center text-gray-500 uppercase">
+                                                            UAS</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody class="bg-white divide-y divide-gray-200">
                                                     @forelse($studentsData as $index => $student)
-                                                        <tr class="{{ $index % 2 === 0 ? 'bg-white' : 'bg-gray-50' }} hover:bg-gray-100">
-                                                            <td class="p-2 border border-gray-300 text-sm text-gray-900 whitespace-nowrap">
+                                                        <tr
+                                                            class="{{ $index % 2 === 0 ? 'bg-white' : 'bg-gray-50' }} hover:bg-gray-100">
+                                                            <td
+                                                                class="p-2 border border-gray-300 text-sm text-gray-900 whitespace-nowrap">
                                                                 {{ $index + 1 }}
                                                             </td>
-                                                            <td class="p-2 border border-gray-300 text-sm text-gray-900 whitespace-nowrap">
+                                                            <td
+                                                                class="p-2 border border-gray-300 text-sm text-gray-900 whitespace-nowrap">
                                                                 {{ $student['student_number'] }}
                                                             </td>
-                                                            <td class="p-2 border border-gray-300 text-sm text-gray-900 whitespace-nowrap">
+                                                            <td
+                                                                class="p-2 border border-gray-300 text-sm text-gray-900 whitespace-nowrap">
                                                                 {{ $student['name'] }}
                                                             </td>
                                                             <!-- Written scores (Tertulis) -->
                                                             @for ($i = 0; $i < 5; $i++)
-                                                                <td class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
+                                                                <td
+                                                                    class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
                                                                     {{ $student['written'][$i] }}
                                                                 </td>
                                                             @endfor
-                                                            <td class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
-                                                                {{ $student['average_written'] ?? '-' }}
+                                                            <td
+                                                                class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
+                                                                {{ $student['average_written'] ? rtrim(rtrim(number_format($student['average_written'], 2, '.', ''), '0'), '.') : '-' }}
                                                             </td>
                                                             <!-- Observation scores (Pengamatan) -->
                                                             @for ($i = 0; $i < 5; $i++)
-                                                                <td class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
+                                                                <td
+                                                                    class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
                                                                     {{ $student['observation'][$i] }}
                                                                 </td>
                                                             @endfor
-                                                            <td class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
-                                                                {{ $student['average_observation'] ?? '-' }}
+                                                            <td
+                                                                class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
+                                                                {{ $student['average_observation'] ? rtrim(rtrim(number_format($student['average_observation'], 2, '.', ''), '0'), '.') : '-' }}
                                                             </td>
                                                             <!-- Sumatif scores -->
-                                                            <td class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
+                                                            <td
+                                                                class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
                                                                 {{ $student['midterm_score'] ?? '-' }}
                                                             </td>
-                                                            <td class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
+                                                            <td
+                                                                class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
                                                                 {{ $student['final_exam_score'] ?? '-' }}
                                                             </td>
                                                             <!-- Final scores -->
-                                                            <td class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
-                                                                {{ $student['final_score'] ?? '-' }}
+                                                            <td
+                                                                class="p-2 border border-gray-300 text-sm text-center text-gray-900 whitespace-nowrap">
+                                                                {{ $student['final_score'] ? rtrim(rtrim(number_format($student['final_score'], 2, '.', ''), '0'), '.') : '-' }}
                                                             </td>
                                                         </tr>
                                                     @empty
                                                         <tr>
-                                                            <td colspan="18" class="p-4 text-sm text-center text-gray-500 border border-gray-300">
+                                                            <td colspan="18"
+                                                                class="p-4 text-sm text-center text-gray-500 border border-gray-300">
                                                                 Tidak ada data nilai untuk filter yang dipilih
                                                             </td>
                                                         </tr>
@@ -174,7 +225,9 @@
                             @else
                                 <div class="p-4 text-red-700 bg-red-100 border-l-4 border-red-500">
                                     <h4 class="font-bold">Data Kelas Tidak Ditemukan</h4>
-                                    <p class="text-sm">Sistem tidak dapat menemukan data kelas yang Anda ampu. Mohon hubungi administrator untuk memastikan bahwa akun Anda telah dikaitkan dengan kelas yang benar.</p>
+                                    <p class="text-sm">Sistem tidak dapat menemukan data kelas yang Anda ampu. Mohon
+                                        hubungi administrator untuk memastikan bahwa akun Anda telah dikaitkan dengan
+                                        kelas yang benar.</p>
                                 </div>
                             @endif
                         </div>

@@ -46,6 +46,14 @@ class Student extends Model
     }
 
     /**
+     * Relasi ke notifications
+     */
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    /**
      * Helper: Ambil kelas siswa pada tahun ajaran tertentu
      */
     public function getClassByYear($academicYearId)

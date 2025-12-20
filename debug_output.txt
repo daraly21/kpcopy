@@ -1,0 +1,24 @@
+﻿=== ACADEMIC YEAR DEBUG ===
+
+Active Academic Year:
+  ID: 2
+  Name: 2024/2025
+
+All Academic Years:
+  ID: 1, Name: 2025/2026, Active: NO
+  ID: 2, Name: 2024/2025, Active: YES
+  ID: 4, Name: 2026/2027, Active: NO
+
+Latest 5 Grades:
+  Grade ID: 10, Student: 2, Subject: 2, Semester: Odd, AcadYear: NULL
+  Grade ID: 9, Student: 2, Subject: 2, Semester: Odd, AcadYear: NULL
+  Grade ID: 8, Student: 1, Subject: 10, Semester: Odd, AcadYear: 2
+  Grade ID: 7, Student: 2, Subject: 1, Semester: Odd, AcadYear: 2
+  Grade ID: 1, Student: 2, Subject: 5, Semester: Odd, AcadYear: 2
+
+Latest 5 Grade Tasks:
+  Task ID: 10, Name: Sakit Dadaku, Student: 2, Subject: 2, Grade ID: 10
+  Task ID: 8, Name: Tugas Menculik Ayam2, Student: 1, Subject: 10, Grade ID: 8
+  Task ID: 7, Name: Pertambahan, Student: 2, Subject: 1, Grade ID: 7
+  Task ID: 6, Name: Jalan Sehat2, Student: 2, Subject: 5, Grade ID: 1
+  Task ID: 5, Name: Nilai Harian 2, Student: 2, Subject: 5, Grade ID: 1

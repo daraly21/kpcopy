@@ -53,6 +53,7 @@ class RapotController extends Controller
                 $studentIds = $students->pluck('id')->toArray();
                 $grades = Grade::whereIn('student_id', $studentIds)
                                ->where('semester', $selectedSemester)
+                               ->where('academic_year_id', $activeYear->id)  // FILTER TAHUN AJARAN AKTIF
                                ->select('student_id', 'subject_id', 'final_score')
                                ->get()
                                ->groupBy('student_id');

@@ -156,7 +156,7 @@ class GradeController extends Controller
         return view('grades.create', compact('subjects', 'students', 'activeYear'));
     }
 
-    public function store_batch(Request $request)
+    public function store(Request $request)
     {
         $user = Auth::user();
 

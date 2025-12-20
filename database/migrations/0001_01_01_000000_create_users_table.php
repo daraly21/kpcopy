@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('nuptk')->nullable(); // Nuptk untuk Guru
             $table->string('email')->unique();
             $table->string('password');
-            $table->string('profile_picture')->nullable(); // Foto profil dari Uploadcare
+            $table->string('profile_picture')->nullable(); // Foto profil (local storage)
             $table->unsignedBigInteger('role_id'); // Role (Admin atau Wali Kelas)
             $table->unsignedBigInteger('class_id')->nullable(); // Hanya untuk Wali Kelas
             $table->unsignedBigInteger('subject_id')->nullable();

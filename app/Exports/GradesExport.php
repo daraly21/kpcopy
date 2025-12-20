@@ -99,19 +99,19 @@ class GradesExport implements FromCollection, WithHeadings, WithStyles, WithColu
                 $student['written'][2],
                 $student['written'][3],
                 $student['written'][4],
-                $student['average_written'] ?? '-',
+                $student['average_written'] ? rtrim(rtrim(number_format($student['average_written'], 2, '.', ''), '0'), '.') : '-',
                 // Non Tertulis (Observation)
                 $student['observation'][0],
                 $student['observation'][1],
                 $student['observation'][2],
                 $student['observation'][3],
                 $student['observation'][4],
-                $student['average_observation'] ?? '-',
+                $student['average_observation'] ? rtrim(rtrim(number_format($student['average_observation'], 2, '.', ''), '0'), '.') : '-',
                 // Sumatif
                 $student['midterm_score'] ?? '-',
                 $student['final_exam_score'] ?? '-',
                 // Akhir
-                $student['final_score'] ?? '-'
+                $student['final_score'] ? rtrim(rtrim(number_format($student['final_score'], 2, '.', ''), '0'), '.') : '-'
             ]);
         }
 

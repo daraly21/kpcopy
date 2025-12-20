@@ -7,6 +7,8 @@ use App\Models\Notification;
 use Illuminate\Http\Request;
 use App\Services\FonnteService;
 use App\Models\Student;
+use App\Models\StudentClass;
+use App\Models\AcademicYear;
 use App\Models\Subject;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -29,13 +31,31 @@ class NotificationController extends Controller
 
         $subjects = Subject::all();
 
+        // Ambil tahun ajaran aktif
+        $activeYear = AcademicYear::where('is_active', 1)->first();
+        if (!$activeYear) {
+            return redirect()->back()->with('error', 'Tahun ajaran aktif belum diset.');
+        }
+
         $query = Student::query();
 
         if ($user->role_id != 1) {
             if (!$user->class_id) {
                 return redirect()->back()->with('error', 'Anda tidak memiliki akses ke kelas tertentu.');
             }
-            $query->where('class_id', $user->class_id);
+            
+            // Ambil siswa yang terdaftar di kelas pada tahun ajaran aktif
+            $studentIds = StudentClass::where('class_id', $user->class_id)
+                ->where('academic_year_id', $activeYear->id)
+                ->pluck('student_id');
+            
+            $query->whereIn('id', $studentIds);
+        } else {
+            // Admin: ambil semua siswa dari tahun ajaran aktif
+            $studentIds = StudentClass::where('academic_year_id', $activeYear->id)
+                ->pluck('student_id');
+            
+            $query->whereIn('id', $studentIds);
         }
 
         $query->with(['gradeTasks' => function ($query) use ($subject_id, $task_name) {

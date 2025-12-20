@@ -79,6 +79,11 @@
                     <!-- Action Buttons -->
                     <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-200">
                         <div class="flex gap-2">
+                            <button id="applyFilterBtn"
+                                class="inline-flex items-center px-3 py-2 border border-blue-600 text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                                <span class="iconify mr-2" data-icon="mdi:filter"></span>
+                                Terapkan Filter
+                            </button>
                             <button id="resetFilterBtn"
                                 class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200">
                                 <span class="iconify mr-2" data-icon="mdi:filter-off"></span>
@@ -136,10 +141,10 @@
                                     @php $rowIndex = 0; @endphp
                                     @foreach ($grades as $studentId => $studentGrades)
                                         @foreach ($studentGrades as $grade)
-                                            <tr class="grade-row {{ $rowIndex % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}"
+                                            <tr class="grade-row hover:bg-gray-100 transition-colors duration-150"
                                                 data-student-name="{{ strtolower($grade->student->name ?? '') }}"
-                                                data-task-name="{{ $grade->task_name }}"
-                                                data-task-type="{{ $grade->type }}"
+                                                data-task-name="{{ strtolower($grade->task_name ?? '') }}"
+                                                data-task-type="{{ $grade->type ?? '' }}"
                                                 data-semester="{{ $grade->grade->semester ?? '' }}"
                                                 data-grade-id="{{ $grade->id }}">
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -147,9 +152,6 @@
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     <div class="text-sm font-medium text-gray-900">
                                                         {{ $grade->student->name ?? 'Tidak Ditemukan' }}</div>
-                                                    <div class="text-sm text-gray-500">
-                                                        {{ $grade->student->class->name ?? 'Kelas Tidak Ditemukan' }}
-                                                    </div>
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     <div class="text-sm text-gray-900 task-name-display">
@@ -295,14 +297,16 @@
             const taskFilter = document.getElementById('task_filter');
             const typeFilter = document.getElementById('type_filter');
             const semesterFilter = document.getElementById('semester_filter');
+            const applyBtn = document.getElementById('applyFilterBtn');
             const resetBtn = document.getElementById('resetFilterBtn');
 
-            // Add event listeners for filters
-            [taskFilter, typeFilter, semesterFilter].forEach(element => {
-                if (element) {
-                    element.addEventListener('change', applyFilters);
-                }
-            });
+            // Apply filter when button is clicked
+            if (applyBtn) {
+                applyBtn.addEventListener('click', function() {
+                    applyFilters();
+                    showAlert('success', 'Filter berhasil diterapkan');
+                });
+            }
 
             // Reset filter functionality
             resetBtn.addEventListener('click', function() {
@@ -315,7 +319,7 @@
         }
 
         function applyFilters() {
-            const taskFilter = document.getElementById('task_filter').value.toLowerCase();
+            const taskFilter = document.getElementById('task_filter').value.toLowerCase().trim();
             const typeFilter = document.getElementById('type_filter').value;
             const semesterFilter = document.getElementById('semester_filter').value;
 
@@ -329,18 +333,18 @@
 
                 let shouldShow = true;
 
-                // Filter Nama Tugas (case-insensitive)
-                if (taskFilter && !taskName.includes(taskFilter)) {
+                // Filter Nama Tugas (case-insensitive) - hanya filter jika ada value
+                if (taskFilter && taskFilter !== '' && !taskName.includes(taskFilter)) {
                     shouldShow = false;
                 }
 
-                // Filter Tipe Penilaian
-                if (typeFilter && taskType !== typeFilter) {
+                // Filter Tipe Penilaian - hanya filter jika ada value
+                if (typeFilter && typeFilter !== '' && taskType !== typeFilter) {
                     shouldShow = false;
                 }
 
-                // Filter Semester
-                if (semesterFilter && semester !== semesterFilter) {
+                // Filter Semester - hanya filter jika ada value
+                if (semesterFilter && semesterFilter !== '' && semester !== semesterFilter) {
                     shouldShow = false;
                 }
 

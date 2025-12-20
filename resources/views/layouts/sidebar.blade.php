@@ -196,7 +196,7 @@
                 </li>
             @endif
 
-            <!-- Rapot Siswa (Wali Kelas) -->
+            <!-- rapor Siswa (Wali Kelas) -->
             @if (auth()->user()->hasRole('Wali Kelas'))
                 <li>
                     <a href="{{ route('rapor.index') }}" @click="handleNavigation"
@@ -206,7 +206,7 @@
                         </div>
                         <div class="overflow-hidden whitespace-nowrap transition-opacity duration-300"
                             :class="$store.sidebar.isOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'">
-                            <span>Rapot Siswa</span>
+                            <span>Rapor Siswa</span>
                         </div>
                     </a>
                 </li>
