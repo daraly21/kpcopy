@@ -20,18 +20,12 @@ class StudentSeeder extends Seeder
 
         $faker = \Faker\Factory::create('id_ID');
 
-        // Target specifically 2024/2025
-        $yearName = '2024/2025';
-        $year = AcademicYear::where('name', $yearName)->first();
+        // Get Active Academic Year
+        $year = AcademicYear::where('is_active', 1)->first();
 
         if (!$year) {
-            $year = AcademicYear::create([
-                'name' => $yearName,
-                'start_date' => '2024-07-15',
-                'end_date' => '2025-06-20',
-                'is_active' => true
-            ]);
-            $this->command->info("Created Academic Year: {$yearName}");
+            $this->command->error("No active academic year found! Run AcademicYearSeeder first.");
+            return;
         }
 
         // Ensure we have classes

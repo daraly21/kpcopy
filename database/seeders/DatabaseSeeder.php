@@ -16,13 +16,14 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
         $this->call([
+            AcademicYearSeeder::class, // Must be first for relationships
             RolePermissionSeeder::class,
             ClassSeeder::class,
             SubjectSeeder::class,
             UserSeeder::class,
-            // StudentSeeder::class,
-            // GradeSeeder::class,
-            // GradeTaskSeeder::class,
+            StudentSeeder::class,
+            GradeSeeder::class,
+            // GradeTaskSeeder::class, // Handled in GradeSeeder
         ]);
 
     }

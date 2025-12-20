@@ -18,48 +18,56 @@ return new class extends Migration
     public function up(): void
     {
         // Step 1: Create academic_years table
-        Schema::create('academic_years', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 20); // Example: 2024/2025
-            $table->boolean('is_active')->default(false);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('academic_years')) {
+            Schema::create('academic_years', function (Blueprint $table) {
+                $table->id();
+                $table->string('name', 20); // Example: 2024/2025
+                $table->boolean('is_active')->default(false);
+                $table->timestamps();
+            });
+        }
 
         // Step 2: Create student_classes pivot table
-        Schema::create('student_classes', function (Blueprint $table) {
-            $table->id();
+        if (!Schema::hasTable('student_classes')) {
+            Schema::create('student_classes', function (Blueprint $table) {
+                $table->id();
 
-            $table->foreignId('student_id')
-                ->constrained('students')
-                ->onDelete('cascade');
+                $table->foreignId('student_id')
+                    ->constrained('students')
+                    ->onDelete('cascade');
 
-            $table->foreignId('class_id')
-                ->constrained('classes')
-                ->onDelete('cascade');
+                $table->foreignId('class_id')
+                    ->constrained('classes')
+                    ->onDelete('cascade');
 
-            $table->foreignId('academic_year_id')
-                ->constrained('academic_years')
-                ->onDelete('cascade');
+                $table->foreignId('academic_year_id')
+                    ->constrained('academic_years')
+                    ->onDelete('cascade');
 
-            $table->timestamps();
+                $table->timestamps();
 
-            // Prevent student from being in same class twice in same academic year
-            $table->unique(['student_id', 'academic_year_id']);
-        });
+                // Prevent student from being in same class twice in same academic year
+                $table->unique(['student_id', 'academic_year_id']);
+            });
+        }
 
         // Step 3: Add academic_year_id to grades table
-        Schema::table('grades', function (Blueprint $table) {
-            $table->foreignId('academic_year_id')
-                ->nullable()
-                ->after('subject_id')
-                ->constrained('academic_years')
-                ->onDelete('cascade');
-        });
+        if (Schema::hasTable('grades') && !Schema::hasColumn('grades', 'academic_year_id')) {
+            Schema::table('grades', function (Blueprint $table) {
+                $table->foreignId('academic_year_id')
+                    ->nullable()
+                    ->after('subject_id')
+                    ->constrained('academic_years')
+                    ->onDelete('cascade');
+            });
+        }
 
         // Step 4: Remove class_id from students table
-        Schema::table('students', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('class_id');
-        });
+        if (Schema::hasTable('students') && Schema::hasColumn('students', 'class_id')) {
+            Schema::table('students', function (Blueprint $table) {
+                $table->dropConstrainedForeignId('class_id');
+            });
+        }
     }
 
     /**
