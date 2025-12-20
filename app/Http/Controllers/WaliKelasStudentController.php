@@ -10,10 +10,24 @@ class WaliKelasStudentController extends Controller
 {
     
     // Halaman daftar siswa
+    // Halaman daftar siswa
     public function index($classId)
     {
         $class = ClassModel::findOrFail($classId);
-        $students = Student::where('class_id', $classId)->get();
+
+         // Get Active Year
+         $activeYear = \App\Models\AcademicYear::where('is_active', 1)->first();
+            
+         // Get Student IDs for this class in active year
+         $studentIds = [];
+         if ($activeYear) {
+             $studentIds = \App\Models\StudentClass::where('class_id', $classId)
+                             ->where('academic_year_id', $activeYear->id)
+                             ->pluck('student_id')
+                             ->toArray();
+         }
+
+        $students = Student::whereIn('id', $studentIds)->get();
 
         return view('phone.index', compact('class', 'students'));
     }

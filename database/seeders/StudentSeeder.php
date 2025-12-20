@@ -3,6 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\Student;
+use App\Models\ClassModel;
+use App\Models\AcademicYear;
+use App\Models\StudentClass;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -12,36 +15,65 @@ class StudentSeeder extends Seeder
     {
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         Student::truncate();
+        StudentClass::truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $faker = \Faker\Factory::create('id_ID');
 
-        for ($classId = 1; $classId <= 8; $classId++) {
+        // Target specifically 2024/2025
+        $yearName = '2024/2025';
+        $year = AcademicYear::where('name', $yearName)->first();
+
+        if (!$year) {
+            $year = AcademicYear::create([
+                'name' => $yearName,
+                'start_date' => '2024-07-15',
+                'end_date' => '2025-06-20',
+                'is_active' => true
+            ]);
+            $this->command->info("Created Academic Year: {$yearName}");
+        }
+
+        // Ensure we have classes
+        $classes = ClassModel::all();
+        if ($classes->isEmpty()) {
+            $this->command->warn('No classes found. Please run ClassSeeder first.');
+            return;
+        }
+
+        $this->command->info("Seeding for Academic Year: {$year->name}");
+        
+        foreach ($classes as $class) {
             for ($i = 0; $i < 10; $i++) {
                 $gender = $faker->randomElement(['L', 'P']);
+                $phone = '628' . $faker->unique()->numberBetween(100000000, 999999999);
 
-                $phone = $faker->unique()->numberBetween(100000000, 999999999);
-                $phone = '628' . $phone;
-
-                Student::create([
+                // Create Student
+                $student = Student::create([
                     'name'         => $gender === 'L'
                         ? $faker->firstNameMale . ' ' . $faker->lastName
                         : $faker->firstNameFemale . ' ' . $faker->lastName,
-                    'nis'          => $faker->unique()->numerify('2025####'),
+                    'nis'          => $faker->unique()->numerify('2024####'), // Changed to 2024 pref
                     'gender'       => $gender,
-                    'class_id'     => $classId,
                     'parent_phone' => $phone,
                     'parent_name'  => $faker->name,
                     'birth_place'  => $faker->city,
-                    'birth_date'   => $faker->dateTimeBetween('-18 years', '-14 years')->format('Y-m-d'),
+                    'birth_date'   => $faker->dateTimeBetween('-12 years', '-7 years')->format('Y-m-d'),
                     'created_at'   => now(),
                     'updated_at'   => now(),
                 ]);
-            }
 
-            $this->command->info("Kelas {$classId} → 10 siswa selesai");
+                // Link to Class and Year
+                StudentClass::create([
+                    'student_id' => $student->id,
+                    'class_id' => $class->id,
+                    'academic_year_id' => $year->id
+                ]);
+            }
+            $this->command->info("  - Class {$class->name}: 10 students seeded.");
         }
 
-        $this->command->info('SELESAI! 8 kelas × 10 siswa = 80 data siswa dummy sudah masuk.');
+        $totalStudents = Student::count();
+        $this->command->info("SELESAI! Total {$totalStudents} data siswa dummy berhasil dibuat untuk tahun {$year->name}.");
     }
 }

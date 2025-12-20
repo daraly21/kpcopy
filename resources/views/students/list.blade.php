@@ -2,22 +2,50 @@
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800 flex items-center">
             <span class="iconify text-indigo-600 text-2xl mr-2" data-icon="mdi:google-classroom"></span>
-            Siswa {{ $class->name }}
+            Siswa {{ $class->name }} - {{ $selectedYear->name }}
         </h2>
     </x-slot>
 
     <div class="py-6" x-data="studentManager()">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <!-- Info Tahun Ajaran & Tombol Kembali -->
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <span class="iconify text-indigo-600 text-xl" data-icon="mdi:calendar-range"></span>
+                        <span class="text-sm font-medium text-gray-700">Tahun Ajaran:</span>
+                        <span
+                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                            {{ $selectedYear->name }}
+                        </span>
+                    </div>
+
+                    <a href="{{ route('admin.siswa.kelas', ['academic_year_id' => $selectedYear->id]) }}"
+                        class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center">
+                        <span class="iconify text-lg mr-1" data-icon="mdi:arrow-left"></span>
+                        Kembali ke Daftar Kelas
+                    </a>
+                </div>
+            </div>
+
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-lg font-medium text-gray-700 flex items-center">
                     <span class="iconify text-indigo-600 text-xl mr-2" data-icon="mdi:account-group"></span>
-                    Daftar Siswa
+                    Daftar Siswa ({{ $students->count() }} siswa)
                 </h3>
-                <button @click="openAddModal()"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-md shadow-sm transition-all duration-200 flex items-center border border-indigo-700">
-                    <span class="iconify text-xl mr-2" data-icon="mdi:plus"></span>
-                    Tambah Siswa
-                </button>
+                <div class="flex gap-2">
+                    {{-- <a href="{{ route('admin.siswa.promotion', ['class' => $class->id, 'academic_year_id' => $selectedYear->id]) }}"
+                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-md shadow-sm transition-all duration-200 flex items-center border border-green-700">
+                        <span class="iconify text-xl mr-2" data-icon="mdi:arrow-up-bold-box-outline"></span>
+                        Naik Kelas
+                    </a> --}}
+                    <button @click="openAddModal()"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-md shadow-sm transition-all duration-200 flex items-center border border-indigo-700">
+                        <span class="iconify text-xl mr-2" data-icon="mdi:plus"></span>
+                        Tambah Siswa
+                    </button>
+                </div>
             </div>
 
             @if (session('success'))
@@ -50,10 +78,8 @@
                     </div>
                 </div>
                 <script>
-                    // Buka modal kembali jika ada error
                     document.addEventListener('DOMContentLoaded', function() {
                         @if (old('_method') === 'PUT')
-                            // Jika edit
                             const studentData = {
                                 id: {{ old('id', 0) }},
                                 name: "{{ old('name') }}",
@@ -68,7 +94,6 @@
                                 Alpine.$data(document.querySelector('[x-data]')).openEditModal(studentData);
                             }, 100);
                         @else
-                            // Jika tambah
                             setTimeout(() => {
                                 const component = Alpine.$data(document.querySelector('[x-data]'));
                                 component.openAddModal();
@@ -161,6 +186,7 @@
                                                 class="text-indigo-600 hover:text-indigo-900" title="Edit">
                                                 <span class="iconify text-xl" data-icon="mdi:pencil"></span>
                                             </button>
+
                                             <form action="{{ route('admin.siswa.destroy', $student->id) }}"
                                                 method="POST" class="inline">
                                                 @csrf @method('DELETE')
@@ -175,8 +201,12 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">
-                                        Tidak ada data siswa yang tersedia
+                                    <td colspan="9" class="px-6 py-8 text-center">
+                                        <span class="iconify text-4xl text-gray-400 mb-2"
+                                            data-icon="mdi:account-off"></span>
+                                        <p class="text-sm text-gray-500 mt-2">
+                                            Belum ada siswa di kelas ini untuk tahun ajaran {{ $selectedYear->name }}
+                                        </p>
                                     </td>
                                 </tr>
                             @endforelse
@@ -201,6 +231,7 @@
                         @csrf
                         <input type="hidden" name="_method" x-bind:value="isEdit ? 'PUT' : 'POST'">
                         <input type="hidden" name="class_id" value="{{ $class->id }}">
+                        <input type="hidden" name="academic_year_id" value="{{ $selectedYear->id }}">
                         <input type="hidden" name="id" x-model="form.id">
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -307,6 +338,8 @@
                 </div>
             </div>
         </div>
+
+
     </div>
 
     <script>
@@ -366,7 +399,6 @@
                         ...student
                     };
 
-                    // Ubah format nomor telepon dari 628xxx menjadi 08xxx untuk tampilan
                     if (this.form.parent_phone && this.form.parent_phone.startsWith('62')) {
                         this.form.parent_phone = '0' + this.form.parent_phone.substring(2);
                     }
@@ -384,7 +416,8 @@
                     this.openModal = true;
                 },
 
-                // Format nomor telepon untuk input
+
+
                 formatPhoneNumber() {
                     let phone = this.form.parent_phone.replace(/\D/g, '');
                     if (phone.startsWith('62')) {
@@ -393,16 +426,12 @@
                     this.form.parent_phone = phone;
                 },
 
-                // Format untuk penyimpanan (62xxx)
                 formatPhoneNumberForStorage() {
                     let phoneNumber = this.form.parent_phone.replace(/\D/g, '');
 
-                    // Jika diawali dengan 0, ganti dengan 62
                     if (phoneNumber.startsWith('0')) {
                         phoneNumber = '62' + phoneNumber.substring(1);
-                    }
-                    // Jika belum diawali dengan 62 atau 0
-                    else if (!phoneNumber.startsWith('62') && phoneNumber.length > 0) {
+                    } else if (!phoneNumber.startsWith('62') && phoneNumber.length > 0) {
                         phoneNumber = '62' + phoneNumber;
                     }
 
@@ -421,7 +450,6 @@
                         parent_phone: ''
                     };
 
-                    // Validasi nama
                     if (!this.form.name || this.form.name.trim() === '') {
                         this.errors.name = 'Nama tidak boleh kosong';
                         valid = false;
@@ -430,7 +458,6 @@
                         valid = false;
                     }
 
-                    // Validasi NIS
                     if (!this.form.nis || this.form.nis.trim() === '') {
                         this.errors.nis = 'NIS tidak boleh kosong';
                         valid = false;
@@ -442,13 +469,11 @@
                         valid = false;
                     }
 
-                    // Validasi jenis kelamin
                     if (!this.form.gender) {
                         this.errors.gender = 'Jenis kelamin harus dipilih';
                         valid = false;
                     }
 
-                    // Validasi nama orang tua
                     if (!this.form.parent_name || this.form.parent_name.trim() === '') {
                         this.errors.parent_name = 'Nama orang tua tidak boleh kosong';
                         valid = false;
@@ -457,19 +482,16 @@
                         valid = false;
                     }
 
-                    // Validasi tempat lahir
                     if (!this.form.birth_place || this.form.birth_place.trim() === '') {
                         this.errors.birth_place = 'Tempat lahir tidak boleh kosong';
                         valid = false;
                     }
 
-                    // Validasi tanggal lahir
                     if (!this.form.birth_date) {
                         this.errors.birth_date = 'Tanggal lahir tidak boleh kosong';
                         valid = false;
                     }
 
-                    // Validasi nomor HP
                     if (!this.form.parent_phone || this.form.parent_phone.trim() === '') {
                         this.errors.parent_phone = 'Nomor HP tidak boleh kosong';
                         valid = false;
@@ -485,19 +507,15 @@
                     }
 
                     if (valid) {
-                        // Format nomor telepon untuk penyimpanan sebelum submit
                         const formattedPhone = this.formatPhoneNumberForStorage();
 
-                        // Buat elemen input tersembunyi untuk menyimpan nomor yang sudah diformat
                         const hiddenInput = document.createElement('input');
                         hiddenInput.type = 'hidden';
                         hiddenInput.name = 'parent_phone';
                         hiddenInput.value = formattedPhone;
 
-                        // Tambahkan ke form
                         e.target.appendChild(hiddenInput);
 
-                        // Ubah name dari input yang terlihat agar tidak bentrok
                         const visibleInput = e.target.querySelector('input[name="parent_phone"]');
                         if (visibleInput) {
                             visibleInput.name = 'parent_phone_display';

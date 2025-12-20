@@ -97,7 +97,19 @@ class RecapController extends Controller
         $result = [];
         $updates = [];
     
-        Student::where('class_id', $user->class_id)
+        // Get Active Year
+        $activeYear = \App\Models\AcademicYear::where('is_active', 1)->first();
+           
+        // Get Student IDs for this class in active year
+        $studentIds = [];
+        if ($activeYear) {
+            $studentIds = \App\Models\StudentClass::where('class_id', $user->class_id)
+                            ->where('academic_year_id', $activeYear->id)
+                            ->pluck('student_id')
+                            ->toArray();
+        }
+
+        Student::whereIn('id', $studentIds)
                ->select('id', 'nis', 'name')
                ->chunk(10, function ($students) use (&$result, &$updates, $subject_id, $semester) {
                    $studentIds = $students->pluck('id')->toArray();

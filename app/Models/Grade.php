@@ -34,4 +34,9 @@ class Grade extends Model
     {
     return $this->hasMany(GradeTask::class, 'grades_id');
     }
+    public function academicYear()
+    {
+    return $this->belongsTo(AcademicYear::class);
+    }
+
 }

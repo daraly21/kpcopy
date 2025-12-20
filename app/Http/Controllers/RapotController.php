@@ -32,8 +32,20 @@ class RapotController extends Controller
             $selectedSemester = request('semester');
 
             if ($class) {
+                // Ambil Active Year
+                $activeYear = \App\Models\AcademicYear::where('is_active', 1)->first();
+
+                // Ambil Student IDs
+                $studentIds = [];
+                if ($activeYear) {
+                    $studentIds = \App\Models\StudentClass::where('class_id', $class->id)
+                                    ->where('academic_year_id', $activeYear->id)
+                                    ->pluck('student_id')
+                                    ->toArray();
+                }
+
                 // Ambil semua siswa di kelas
-                $students = Student::where('class_id', $class->id)
+                $students = Student::whereIn('id', $studentIds)
                                   ->select('id', 'nis', 'name')
                                   ->get();
 
