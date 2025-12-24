@@ -112,13 +112,7 @@ class RecapController extends Controller
         Student::whereIn('id', $studentIds)
                ->select('id', 'nis', 'name')
                ->chunk(10, function ($students) use (&$result, &$updates, $subject_id, $semester, $activeYear) {
-                   Log::info('Processing chunk of students', [
-                       'students_count' => $students->count(),
-                       'subject_id' => $subject_id,
-                       'semester' => $semester,
-                       'active_year_id' => $activeYear ? $activeYear->id : null
-                   ]);
-                                      $studentIds = $students->pluck('id')->toArray();
+                   $studentIds = $students->pluck('id')->toArray();
                     
                     $grades = Grade::whereIn('student_id', $studentIds)
                                    ->where('subject_id', $subject_id)
@@ -147,31 +141,8 @@ class RecapController extends Controller
                        $grade = $grades->get($student->id);
                        
                        if ($grade) {
-                           // DEBUG: Log untuk melihat data
-                           \Log::info('Processing grade for student', [
-                               'student_id' => $student->id,
-                               'student_name' => $student->name,
-                               'grade_id' => $grade->id,
-                               'subject_id' => $grade->subject_id,
-                               'semester' => $grade->semester,
-                               'academic_year_id' => $grade->academic_year_id
-                           ]);
-                           
                            // Gunakan relasi yang sudah di-eager load dan urutkan
                            $tasks = $grade->gradeTasks->sortBy('created_at');
-                           
-                           \Log::info('Grade tasks retrieved', [
-                               'student_id' => $student->id,
-                               'tasks_count' => $tasks->count(),
-                               'tasks' => $tasks->map(function($t) {
-                                   return [
-                                       'id' => $t->id,
-                                       'task_name' => $t->task_name,
-                                       'type' => $t->type,
-                                       'score' => $t->score
-                                   ];
-                               })
-                           ]);
                            
                            $writtenCounter = 0;
                            $observationCounter = 0;
