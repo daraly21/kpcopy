@@ -39,7 +39,7 @@ class GradeSeeder extends Seeder
 
         Grade::create([
             'student_id' => 1,
-            'subject_id' => 10,
+            'subject_id' => 7,
             'semester' => 'Odd',
             'average_written' => null,
             'average_observation' => null,
@@ -81,7 +81,7 @@ class GradeSeeder extends Seeder
 
         Grade::create([
             'student_id' => 2,
-            'subject_id' => 10,
+            'subject_id' => 7,
             'semester' => 'Odd',
             'average_written' => 99.00,
             'average_observation' => 69.00,

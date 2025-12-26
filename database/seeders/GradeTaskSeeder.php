@@ -74,7 +74,7 @@ class GradeTaskSeeder extends Seeder
 
         GradeTask::create([
             'student_id' => 1,
-            'subject_id' => 10,
+            'subject_id' => 7,
             'task_name' => 'Tugas Menculik Ayam2',
             'type' => 'written',
             'grades_id' => 8,
@@ -128,7 +128,7 @@ class GradeTaskSeeder extends Seeder
 
         GradeTask::create([
             'student_id' => 2,
-            'subject_id' => 10,
+            'subject_id' => 7,
             'task_name' => 'Tugas Menculik Ayam2',
             'type' => 'written',
             'grades_id' => 12,
@@ -137,7 +137,7 @@ class GradeTaskSeeder extends Seeder
 
         GradeTask::create([
             'student_id' => 2,
-            'subject_id' => 10,
+            'subject_id' => 7,
             'task_name' => 'Nilai Harian 2',
             'type' => 'observation',
             'grades_id' => 12,

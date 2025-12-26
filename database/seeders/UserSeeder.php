@@ -44,7 +44,7 @@ class UserSeeder extends Seeder
             'profile_picture' => 'profile_pictures/1766237300_6946a474ae57f.png',
             'role_id' => 3,
             'class_id' => null,
-            'subject_id' => 10,
+            'subject_id' => 7,
         ]);
         $user->assignRole('Guru Mata Pelajaran');
 
