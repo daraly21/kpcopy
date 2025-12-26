@@ -30,16 +30,6 @@ class ClassModel extends Model
         return $this->hasOne(User::class, 'class_id')->where('role_id', 2);
     }
 
-    /**
-     * Relasi many-to-many ke academic_years melalui pivot table
-     */
-    public function academicYears()
-    {
-        return $this->belongsToMany(AcademicYear::class, 'class_academic_year')
-                    ->withPivot('is_active')
-                    ->withTimestamps();
-    }
-
 
     /**
      * Helper: Ambil jumlah siswa pada tahun ajaran tertentu

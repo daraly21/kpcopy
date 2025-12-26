@@ -90,10 +90,12 @@ class GradeController extends Controller
                 ];
             }
 
-            // Ambil data nilai
+            // Ambil data nilai (FILTER BY ACADEMIC YEAR!)
             $grades = GradeTask::join('students', 'grade_tasks.student_id', '=', 'students.id')
                 ->join('subjects', 'grade_tasks.subject_id', '=', 'subjects.id')
+                ->join('grades', 'grade_tasks.grades_id', '=', 'grades.id')  // JOIN dengan grades
                 ->whereIn('students.id', $studentIds)
+                ->where('grades.academic_year_id', $activeYear->id)  // FILTER TAHUN AJARAN!
                 ->when($selectedSubject, function ($query) use ($selectedSubject) {
                     $query->where('grade_tasks.subject_id', $selectedSubject);
                 })

@@ -23,9 +23,10 @@ class SubjectSeeder extends Seeder
         ];
 
         foreach ($subjects as $subject) {
-            DB::table('subjects')->insert([
-                'name' => $subject,
-            ]);
+            DB::table('subjects')->updateOrInsert(
+                ['name' => $subject],
+                ['name' => $subject]
+            );
         }
     }
 }

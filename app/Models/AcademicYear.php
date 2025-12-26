@@ -17,11 +17,4 @@ class AcademicYear extends Model
     {
         return $this->hasMany(Grade::class);
     }
-
-    public function classes()
-    {
-        return $this->belongsToMany(ClassModel::class, 'class_academic_year')
-                    ->withPivot('is_active')
-                    ->withTimestamps();
-    }
 }
