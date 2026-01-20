@@ -1,18 +1,16 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "command": "npm install && npm run build && composer install",
+    "command": "npm install && npm run build && composer install --no-dev --optimize-autoloader",
     "builder": "nixpacks",
     "nixpacks": {
-      "nodeVersion": "18"
-    },
-    "cache": false
+      "nodeVersion": "18",
+      "phpVersion": "8.2"
+    }
   },
   "deploy": {
-    "startCommand": "php artisan serve --host=0.0.0.0 --port=9000",
-    "env": {
-      "APP_ENV": "production",
-      "APP_DEBUG": "true"
-    }
+    "startCommand": "php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=$PORT",
+    "healthcheckPath": "/",
+    "restartPolicyType": "ON_FAILURE"
   }
 }
