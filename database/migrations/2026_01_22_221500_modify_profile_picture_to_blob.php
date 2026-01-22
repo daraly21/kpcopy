@@ -17,9 +17,9 @@ return new class extends Migration
         });
 
         Schema::table('users', function (Blueprint $table) {
-            // Add new columns for storing image data in database
-            $table->longText('profile_picture')->nullable()->after('subject_id'); // Base64 encoded image
-            $table->string('profile_picture_mime', 50)->nullable()->after('profile_picture'); // MIME type (e.g., image/jpeg)
+            // Add new column for storing image as data URI (includes mime type)
+            // Format: data:image/jpeg;base64,/9j/4AAQ...
+            $table->longText('profile_picture')->nullable()->after('subject_id');
         });
     }
 
@@ -29,7 +29,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['profile_picture', 'profile_picture_mime']);
+            $table->dropColumn('profile_picture');
         });
 
         Schema::table('users', function (Blueprint $table) {
