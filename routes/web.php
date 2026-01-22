@@ -183,6 +183,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::put('/profile/picture/update', [ProfilePictureController::class, 'update'])->name('profile.picture.update');
+    Route::get('/profile/picture/{userId?}', [ProfilePictureController::class, 'show'])->name('profile.picture.show');
+    Route::delete('/profile/picture', [ProfilePictureController::class, 'destroy'])->name('profile.picture.destroy');
 });
 
 // 🔐 Otentikasi

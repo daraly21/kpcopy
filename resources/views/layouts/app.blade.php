@@ -55,8 +55,8 @@
                                     <div class="flex items-center cursor-pointer" @click="open = !open">
                                         <div class="flex items-center">
                                             <div class="mr-2">
-                                                <!-- Gunakan URL dari profile_picture -->
-                                                <img src="{{ Auth::user()->profile_picture ? asset('storage/' . Auth::user()->profile_picture) : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&color=7F9CF5&background=EBF4FF' }}"
+                                                <!-- Foto profil dari database -->
+                                                <img src="{{ Auth::user()->profile_picture ? route('profile.picture.show') : 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) . '&color=7F9CF5&background=EBF4FF' }}"
                                                     alt="{{ Auth::user()->name }}"
                                                     class="rounded-full h-8 w-8 object-cover">
                                             </div>

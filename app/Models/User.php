@@ -28,6 +28,7 @@ class User extends Authenticatable
     'class_id',
     'subject_id',
     'profile_picture',
+    'profile_picture_mime',
     ];
     
 

@@ -66,8 +66,8 @@
                                 Foto Profil Saat Ini</h4>
                             <div
                                 class="w-40 h-40 rounded-full overflow-hidden shadow-md transform hover:scale-105 transition">
-                                <img src="{{ asset('storage/' . auth()->user()->profile_picture) }}"
-                                    alt="Profile Picture" class="w-full h-full object-cover">
+                                <img src="{{ route('profile.picture.show') }}" alt="Profile Picture"
+                                    class="w-full h-full object-cover">
                             </div>
                         </div>
                     @endif
