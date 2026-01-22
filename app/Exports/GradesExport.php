@@ -8,6 +8,8 @@ use App\Models\GradeTask;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\ClassModel;
+use App\Models\StudentClass;
+use App\Models\AcademicYear;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -24,6 +26,7 @@ class GradesExport implements FromCollection, WithHeadings, WithStyles, WithColu
     protected $class;
     protected $year;
     protected $data;
+    protected $academicYear;
 
     public function __construct($subject_id, $semester, $class_id)
     {
@@ -32,6 +35,7 @@ class GradesExport implements FromCollection, WithHeadings, WithStyles, WithColu
         $this->class_id = $class_id;
         $this->subject = Subject::find($subject_id);
         $this->class = ClassModel::find($class_id);
+        $this->academicYear = AcademicYear::where('is_active', 1)->first();
         $this->year = date('Y');
         $this->data = $this->getGradeData();
     }
@@ -244,13 +248,33 @@ class GradesExport implements FromCollection, WithHeadings, WithStyles, WithColu
         $result = [];
         $updates = [];
 
-        Student::where('class_id', $this->class_id)
+        // Return empty if no active academic year
+        if (!$this->academicYear) {
+            return $result;
+        }
+
+        // Get Student IDs from StudentClass pivot table for this class and active academic year
+        $studentIds = StudentClass::where('class_id', $this->class_id)
+                        ->where('academic_year_id', $this->academicYear->id)
+                        ->pluck('student_id')
+                        ->toArray();
+
+        // Return empty if no students found
+        if (empty($studentIds)) {
+            return $result;
+        }
+
+        Student::whereIn('id', $studentIds)
                ->select('id', 'nis', 'name')
                ->chunk(10, function ($students) use (&$result, &$updates) {
                    $studentIds = $students->pluck('id')->toArray();
                    $grades = Grade::whereIn('student_id', $studentIds)
                                   ->where('subject_id', $this->subject_id)
                                   ->where('semester', $this->semester)
+                                  ->where('academic_year_id', $this->academicYear->id)
+                                  ->with(['gradeTasks' => function($query) {
+                                      $query->orderBy('created_at', 'asc');
+                                  }])
                                   ->get()
                                   ->keyBy('student_id');
 
@@ -271,7 +295,7 @@ class GradesExport implements FromCollection, WithHeadings, WithStyles, WithColu
                        $grade = $grades->get($student->id);
                        
                        if ($grade) {
-                           $tasks = $grade->gradeTasks;
+                           $tasks = $grade->gradeTasks->sortBy('created_at');
                            
                            $writtenCounter = 0;
                            $observationCounter = 0;
