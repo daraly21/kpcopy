@@ -28,9 +28,12 @@ class AppServiceProvider extends ServiceProvider
         Model::preventLazyLoading(false);
         // DB::disableQueryLog();
         // Model::preventLazyLoading(!app()->isProduction());
-        // if ($this->app->environment('production')) {
-        //     URL::forceScheme('https');
-        // }
+        
+        // Force HTTPS for production to prevent "Form is not secure" warning
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
+        
         // $this->optimizeEloquent();
     }
     
